@@ -31,75 +31,111 @@ def load(files_path):
         
     return ims, chars
 
-def generate_plate(plate_path, num, plate, plate_size, num_size, char_size, num_list, char_list, num_ims, char_ims, save_path, save):
+def generate_plate(plate_path, num, plate, plate_size, num_size, num_size_2, char_size, init_size, num_list, char_list, num_ims, char_ims, save_path, label_prefix, save):
     
     Plate = cv2.resize(cv2.imread(plate_path), plate_size)
-        
-    plate_chars = []
-    for char in plate:
-        plate_chars.append(char)
+    plate_chars = [char for char in plate]
+    
+    if regions != None:
+        regions = [cv2.resize(region, region_size) for region in regions]
 
-    for i, Iter in enumerate(range(num)):
+    for i, n in enumerate(range(num)):
         Plate = cv2.resize(cv2.imread(plate_path), plate_size)
-        label = "1_" # first letter when save the image
+        label = label_prefix # first letter when save the image
         # row -> y , col -> x
-        row, col = 13, 35  # row + 83, col + 56
+        row, col = init_size[0], init_size[1]  # row + 83, col + 56
+        
+        Plate[row:row + 60, col:col + 88, :] = regions[i % 16]
+            col += 88 + 8
+        
         # number 1
-        rand_int = int(plate_chars[0])
-        label += num_list[rand_int]
-        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[0]], num_size)
-        col += 56
+        plate_int = int(plate_chars[0])
+        label += num_list[plate_int]
+        Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[0]], num_size) #(56, 83)
+        col += num_size[0]
 
         # number 2
-        rand_int = int(plate_chars[1])
-        label += num_list[rand_int]
-        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[1]], num_size)
-        col += 56
+        plate_int = int(plate_chars[1])
+        label += num_list[plate_int]
+        Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[1]], num_size)
+        col += num_size[0]
 
         # character 3
         label += plate_chars[2]
         try:
-            Plate[row:row + 83, col:col + 60, :] = cv2.resize(char_ims[plate_chars[2]], char_size)
-            col += (60 + 36)
+            Plate[row:row + char_size[1], col:col + char_size[0], :] = cv2.resize(char_ims[plate_chars[2]], char_size)
+            col += (char_size[0] + init_size[1])
         except:
             print(plate_chars[2])
 
-        # number 4
-        rand_int = int(plate_chars[3])
-        label += num_list[rand_int]
-        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[3]], num_size)
-        col += 56
+        if num_size_2 != None:
+            print("Not none!")
+            plate_int = int(plate_chars[3])
+            label += num_list[plate_int]
+            Plate[row:row + num_size_2[1], col:col + num_size_2[0], :] = cv2.resize(num_ims[plate_chars[3]], num_size_2)
+            col += num_size_2[0]
 
-        # number 5
-        rand_int = int(plate_chars[4])
-        label += num_list[rand_int]
-        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[4]], num_size)
-        col += 56
+            # number 5
+            plate_int = int(plate_chars[4])
+            label += num_list[plate_int]
+            Plate[row:row + num_size_2[1], col:col + num_size_2[0], :] = cv2.resize(num_ims[plate_chars[4]], num_size_2)
+            col += num_size_2[0]
 
-        # number 6
-        rand_int = int(plate_chars[5])
-        label += num_list[rand_int]
-        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[5]], num_size)
-        col += 56
+            # number 6
+            plate_int = int(plate_chars[5])
+            label += num_list[plate_int]
+            Plate[row:row + num_size_2[1], col:col + num_size_2[0], :] = cv2.resize(num_ims[plate_chars[5]], num_size_2)
+            col += num_size_2[0]
 
-        # number 7
-        rand_int = int(plate_chars[6])
-        label += num_list[rand_int]
-        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[6]], num_size)
-        col += 56
-        Plate = random_bright(Plate)
-        if save:
-            # tfs = albumentations.Compose([Affine(rotate=[-7, 7], shear=None, p=0.5),
-            #                  Perspective(scale=(0.05, 0.12), p=0.5)])
-            # Plate = tfs(image=Plate)
-            cv2.imwrite(save_path + label + ".jpg", Plate)
-        else:
-            cv2.imshow(label, Plate)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+            # number 7
+            plate_int = int(plate_chars[6])
+            label += num_list[plate_int]
+            Plate[row:row + num_size_2[1], col:col + num_size_2[0], :] = cv2.resize(num_ims[plate_chars[6]], num_size_2)
+            col += num_size_2[0]
+
+            Plate = random_bright(Plate)
+            if save:
+                # tfs = albumentations.Compose([Affine(rotate=[-7, 7], shear=None, p=0.5),
+                #                  Perspective(scale=(0.05, 0.12), p=0.5)])
+                # Plate = tfs(image=Plate)
+                cv2.imwrite(save_path + label + ".jpg", Plate)
+            else:
+                pass
         
-        print("Done")
+        else:
+            # number 4
+            plate_int = int(plate_chars[3])
+            label += num_list[plate_int]
+            Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[3]], num_size)
+            col += num_size[0]
 
+            # number 5
+            plate_int = int(plate_chars[4])
+            label += num_list[plate_int]
+            Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[4]], num_size)
+            col += num_size[0]
+
+            # number 6
+            plate_int = int(plate_chars[5])
+            label += num_list[plate_int]
+            Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[5]], num_size)
+            col += num_size[0]
+
+            # number 7
+            plate_int = int(plate_chars[6])
+            label += num_list[plate_int]
+            Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[6]], num_size)
+            col += num_size[0]
+
+            Plate = random_bright(Plate)
+            if save:
+                # tfs = albumentations.Compose([Affine(rotate=[-7, 7], shear=None, p=0.5),
+                #                  Perspective(scale=(0.05, 0.12), p=0.5)])
+                # Plate = tfs(image=Plate)
+                cv2.imwrite(save_path + label + ".jpg", Plate)
+            else:
+                pass
+        
 class ImageGenerator:
     
     def __init__(self, save_path):
@@ -122,94 +158,39 @@ class ImageGenerator:
         self.Number_g, self.number_list_g = load("./num_g/")
         self.Char1_g, self.char_list_g = load("./char1_g/")
         self.Region_g, self.region_list_g = load("./region_g/")
-        
-        #=========================================================================
 
-
-    def Type_1(self, num, plate, save=False):
+    def Generation(self, num, plate, save, plate_type):
         
-        generate_plate(plate_path="plate.jpg", 
-                       plate=plate, num=num, num_size=(56, 83),
-                       num_list=self.number_list, 
-                       char_list=self.char_list,
-                       num_ims=self.Number, char_size=(60, 83),
-                       char_ims=self.Char1,
-                       save_path=self.save_path,
-                       save=save, plate_size=(520, 110))
-
-                
-    def Type_2(self, num, plate, save=False):
-        
-        generate_plate(plate_path="plate.jpg", 
-                       plate=plate, num=num,
-                       num_list=self.number_list, 
-                       char_list=self.char_list,
-                       num_ims=self.Number,
-                       char_ims=self.Char1,
-                       save_path=self.save_path,
+        if plate_type == "short":
+            generate_plate(plate_path="plate.jpg", 
+                       plate=plate, num=num, num_size=(45, 83), num_size_2=None, 
+                       num_list=self.number_list, init_size=(46, 10),
+                       char_list=self.char_list, regions=None,
+                       num_ims=self.Number, char_size=(49, 70),
+                       char_ims=self.Char1, label_prefix=plate_type,
+                       save_path=self.save_path, region_size=(88, 60)
                        save=save, plate_size=(355, 155))
         
-        # number = [cv2.resize(number, (45, 83)) for number in self.Number]
-        Plate = cv2.resize(self.plate, (355, 155))
-        
-        plate_chars = []
-        for char in plate:
-            plate_chars.append(char)
+        elif plate_type == "long":
+            generate_plate(plate_path="plate.jpg", 
+                       plate=plate, num=num, num_size=(56, 83), num_size_2=None, 
+                       num_list=self.number_list, init_size=(13, 36), # start from left to right
+                       char_list=self.char_list, regions=None,
+                       num_ims=self.Number, char_size=(60, 83),
+                       char_ims=self.Char1, label_prefix=plate_type,
+                       save_path=self.save_path, region_size=(88, 60)
+                       save=save, plate_size=(520, 110))
             
-        for i, Iter in enumerate(range(num)):
-            Plate = cv2.resize(self.plate, (355, 155))
-            label = "2_"
-            row, col = 46, 10  # row + 83, col + 56
-
-            # number 1
-            rand_int = int(plate_chars[0])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
-            col += 45
-
-            # number 2
-            rand_int = int(plate_chars[1])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
-            col += 45
-
-            # character 3
-            label += plate_chars[2]
-            # label += self.char_list[i%37]
-            Plate[row + 12:row + 82, col + 2:col + 49 + 2, :] = cv2.resize(self.Char1[plate_chars[2]], (49, 70))
-            col += 49 + 2
-
-            # number 4
-            rand_int = int(plate_chars[3])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col + 2:col + 45 + 2, :] = number[rand_int]
-            col += 45 + 2
-
-            # number 5
-            rand_int = int(plate_chars[4])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
-            col += 45
-
-            # number 6
-            rand_int = int(plate_chars[5])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
-            col += 45
-
-            # number 7
-            rand_int = int(plate_chars[6])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
-            col += 45
-            Plate = random_bright(Plate)
-            if save:
-                cv2.imwrite(self.save_path + label + ".jpg", Plate)
-            else:
-                cv2.imshow(label, Plate)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-
+        elif plate_type == "yellow":
+            generate_plate(plate_path="plate_y.jpg", 
+                       plate=plate, num=num, num_size=(44, 60), num_size_2=(64, 90), 
+                       num_list=self.number_list, init_size=(8, 76), # start from left to right
+                       char_list=self.char_list, regions=self.Region_y,
+                       num_ims=self.Number, char_size=(64, 62),
+                       char_ims=self.Char1, label_prefix=plate_type,
+                       save_path=self.save_path, region_size=(88, 60),
+                       save=save, plate_size=(336, 170))
+    
     def Type_3(self, num, plate, save=False):
         
         number1 = [cv2.resize(number, (44, 60)) for number in self.Number_y]
@@ -493,8 +474,11 @@ plates = args.plates
 #         img.save(filename=f"{img_dir}{plates[idx - 1]}.png")
         
 for idx in range(23, len(plates) + 1):
-    A.Type_1(idx, plates[idx - 1], save=Save)
-    print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")
+    # A.Generation(idx, plates[idx - 1], save=Save, plate_type="long")
+    # A.Generation(idx, plates[idx - 1], save=Save, plate_type="short")
+    A.Generation(idx, plates[idx - 1], save=Save, plate_type="yellow")
+    # A.Type_1(idx, plates[idx - 1], save=Save)
+    # print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")
     # A.Type_2(idx, plates[idx - 1], save=Save)
     # print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")
     # A.Type_3(idx, plates[idx - 1], save=Save)

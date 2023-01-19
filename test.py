@@ -1,5 +1,5 @@
 import os, random, math
-from wand.image import Image
+# from wand.image import Image
 import cv2, argparse
 import numpy as np
 import pandas as pd
@@ -7,6 +7,7 @@ from albumentations.augmentations.geometric.transforms import *
 import albumentations
 
 def random_bright(img):
+    
     img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     img = np.array(img, dtype=np.float64)
     random_bright = .5 + np.random.uniform()
@@ -14,9 +15,93 @@ def random_bright(img):
     img[:, :, 2][img[:, :, 2] > 255] = 255
     img = np.array(img, dtype=np.uint8)
     img = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
+    
     return img
 
+def load(files_path):
+    
+    chars_paths = sorted(os.listdir(files_path))
+    ims, chars = {}, [] 
+
+    for char_path in chars_paths:
+        fname = os.path.splitext(char_path)[0]
+        im = cv2.imread(os.path.join(files_path, char_path))
+        ims[fname] = im
+        chars.append(char_path[0:-4])
+        
+    return ims, chars
+
+def generate_plate(plate_path, num, plate, plate_size, num_size, char_size, num_list, char_list, num_ims, char_ims, save_path, save):
+    
+    Plate = cv2.resize(cv2.imread(plate_path), plate_size)
+        
+    plate_chars = []
+    for char in plate:
+        plate_chars.append(char)
+
+    for i, Iter in enumerate(range(num)):
+        Plate = cv2.resize(cv2.imread(plate_path), plate_size)
+        label = "1_" # first letter when save the image
+        # row -> y , col -> x
+        row, col = 13, 35  # row + 83, col + 56
+        # number 1
+        rand_int = int(plate_chars[0])
+        label += num_list[rand_int]
+        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[0]], num_size)
+        col += 56
+
+        # number 2
+        rand_int = int(plate_chars[1])
+        label += num_list[rand_int]
+        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[1]], num_size)
+        col += 56
+
+        # character 3
+        label += plate_chars[2]
+        try:
+            Plate[row:row + 83, col:col + 60, :] = cv2.resize(char_ims[plate_chars[2]], char_size)
+            col += (60 + 36)
+        except:
+            print(plate_chars[2])
+
+        # number 4
+        rand_int = int(plate_chars[3])
+        label += num_list[rand_int]
+        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[3]], num_size)
+        col += 56
+
+        # number 5
+        rand_int = int(plate_chars[4])
+        label += num_list[rand_int]
+        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[4]], num_size)
+        col += 56
+
+        # number 6
+        rand_int = int(plate_chars[5])
+        label += num_list[rand_int]
+        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[5]], num_size)
+        col += 56
+
+        # number 7
+        rand_int = int(plate_chars[6])
+        label += num_list[rand_int]
+        Plate[row:row + 83, col:col + 56, :] = cv2.resize(num_ims[plate_chars[6]], num_size)
+        col += 56
+        Plate = random_bright(Plate)
+        if save:
+            # tfs = albumentations.Compose([Affine(rotate=[-7, 7], shear=None, p=0.5),
+            #                  Perspective(scale=(0.05, 0.12), p=0.5)])
+            # Plate = tfs(image=Plate)
+            cv2.imwrite(save_path + label + ".jpg", Plate)
+        else:
+            cv2.imshow(label, Plate)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+        
+        print("Done")
+
 class ImageGenerator:
+    
     def __init__(self, save_path):
         self.save_path = save_path
         # Plate
@@ -24,160 +109,323 @@ class ImageGenerator:
         self.plate2 = cv2.imread("plate_y.jpg")
         self.plate3 = cv2.imread("plate_g.jpg")
 
-        # loading Number
-        file_path = "./num/"
-        file_list = sorted(os.listdir(file_path))
-        self.Number = list()
-        self.number_list = list()
-        for file in file_list:
-            img_path = os.path.join(file_path, file)
-            img = cv2.imread(img_path)
-            self.Number.append(img)
-            self.number_list.append(file[0:-4])
+        # Basic nums and chars
+        self.Number, self.number_list = load("./num/")
+        self.Char1, self.char_list = load("./char1/")
 
-        # loading Char
-        file_path = "./char1/"
-        file_list = sorted(os.listdir(file_path))
-        self.char_list = list()
-        self.Char1 = dict()
-        for file in file_list:
-            fname = os.path.splitext(file)[0]
-            img_path = os.path.join(file_path, file)
-            img = cv2.imread(img_path)
-            self.Char1[fname] = img
-            self.char_list.append(file[0:-4])
-        # print(self.char_list)
-
-        # loading Number ====================  yellow-two-line  ==========================
-        file_path = "./num_y/"
-        file_list = os.listdir(file_path)
-        self.Number_y = list()
-        self.number_list_y = list()
-        for file in file_list:
-            img_path = os.path.join(file_path, file)
-            img = cv2.imread(img_path)
-            self.Number_y.append(img)
-            self.number_list_y.append(file[0:-4])
-
-        # loading Char
-        file_path = "./char1_y/"
-        file_list = os.listdir(file_path)
-        self.char_list_y = list()
-        self.Char1_y = list()
-        for file in file_list:
-            img_path = os.path.join(file_path, file)
-            img = cv2.imread(img_path)
-            self.Char1_y.append(img)
-            self.char_list_y.append(file[0:-4])
-
-        # loading Resion
-        file_path = "./region_y/"
-        file_list = os.listdir(file_path)
-        self.Resion_y = list()
-        self.resion_list_y = list()
-        for file in file_list:
-            img_path = os.path.join(file_path, file)
-            img = cv2.imread(img_path)
-            self.Resion_y.append(img)
-            self.resion_list_y.append(file[0:-4])
-        #=========================================================================
-
-        # loading Number ====================  green-two-line  ==========================
-        file_path = "./num_g/"
-        file_list = os.listdir(file_path)
-        self.Number_g = list()
-        self.number_list_g = list()
-        for file in file_list:
-            img_path = os.path.join(file_path, file)
-            img = cv2.imread(img_path)
-            self.Number_g.append(img)
-            self.number_list_g.append(file[0:-4])
-
-        # loading Char
-        file_path = "./char1_g/"
-        file_list = os.listdir(file_path)
-        self.char_list_g = list()
-        self.Char1_g = list()
-        for file in file_list:
-            img_path = os.path.join(file_path, file)
-            img = cv2.imread(img_path)
-            self.Char1_g.append(img)
-            self.char_list_g.append(file[0:-4])
-
-        # loading Resion
-        file_path = "./region_g/"
-        file_list = os.listdir(file_path)
-        self.Resion_g = list()
-        self.resion_list_g = list()
-        for file in file_list:
-            img_path = os.path.join(file_path, file)
-            img = cv2.imread(img_path)
-            self.Resion_g.append(img)
-            self.resion_list_g.append(file[0:-4])
+        # Yellow nums and chars
+        self.Number_y, self.number_list_y = load("./num_y/")
+        self.Char1_y, self.char_list_y = load("./char1_y/")
+        self.Region_y, self.region_list_y = load("./region_y/")
+       
+        # Green nums and chars
+        self.Number_g, self.number_list_g = load("./num_g/")
+        self.Char1_g, self.char_list_g = load("./char1_g/")
+        self.Region_g, self.region_list_g = load("./region_g/")
+        
         #=========================================================================
 
 
     def Type_1(self, num, plate, save=False):
-        number = [cv2.resize(number, (56, 83)) for number in self.Number]
-        Plate = cv2.resize(self.plate, (520, 110))
+        
+        generate_plate(plate_path="plate.jpg", 
+                       plate=plate, num=num, num_size=(56, 83),
+                       num_list=self.number_list, 
+                       char_list=self.char_list,
+                       num_ims=self.Number, char_size=(60, 83),
+                       char_ims=self.Char1,
+                       save_path=self.save_path,
+                       save=save, plate_size=(520, 110))
+
+                
+    def Type_2(self, num, plate, save=False):
+        
+        generate_plate(plate_path="plate.jpg", 
+                       plate=plate, num=num,
+                       num_list=self.number_list, 
+                       char_list=self.char_list,
+                       num_ims=self.Number,
+                       char_ims=self.Char1,
+                       save_path=self.save_path,
+                       save=save, plate_size=(355, 155))
+        
+        # number = [cv2.resize(number, (45, 83)) for number in self.Number]
+        Plate = cv2.resize(self.plate, (355, 155))
+        
+        plate_chars = []
+        for char in plate:
+            plate_chars.append(char)
+            
+        for i, Iter in enumerate(range(num)):
+            Plate = cv2.resize(self.plate, (355, 155))
+            label = "2_"
+            row, col = 46, 10  # row + 83, col + 56
+
+            # number 1
+            rand_int = int(plate_chars[0])
+            label += self.number_list[rand_int]
+            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
+            col += 45
+
+            # number 2
+            rand_int = int(plate_chars[1])
+            label += self.number_list[rand_int]
+            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
+            col += 45
+
+            # character 3
+            label += plate_chars[2]
+            # label += self.char_list[i%37]
+            Plate[row + 12:row + 82, col + 2:col + 49 + 2, :] = cv2.resize(self.Char1[plate_chars[2]], (49, 70))
+            col += 49 + 2
+
+            # number 4
+            rand_int = int(plate_chars[3])
+            label += self.number_list[rand_int]
+            Plate[row:row + 83, col + 2:col + 45 + 2, :] = number[rand_int]
+            col += 45 + 2
+
+            # number 5
+            rand_int = int(plate_chars[4])
+            label += self.number_list[rand_int]
+            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
+            col += 45
+
+            # number 6
+            rand_int = int(plate_chars[5])
+            label += self.number_list[rand_int]
+            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
+            col += 45
+
+            # number 7
+            rand_int = int(plate_chars[6])
+            label += self.number_list[rand_int]
+            Plate[row:row + 83, col:col + 45, :] = number[rand_int]
+            col += 45
+            Plate = random_bright(Plate)
+            if save:
+                cv2.imwrite(self.save_path + label + ".jpg", Plate)
+            else:
+                cv2.imshow(label, Plate)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
+    def Type_3(self, num, plate, save=False):
+        
+        number1 = [cv2.resize(number, (44, 60)) for number in self.Number_y]
+        number2 = [cv2.resize(number, (64, 90)) for number in self.Number_y]
+        region = [cv2.resize(region, (88, 60)) for region in self.Region_y]
+        # char = [cv2.resize(char1, (64, 62)) for char1 in self.Char1_y]
+        
         plate_chars = []
         for char in plate:
             plate_chars.append(char)
 
         for i, Iter in enumerate(range(num)):
-            Plate = cv2.resize(self.plate, (520, 110))
-            label = "" # first letter when save the image
+            Plate = cv2.resize(self.plate2, (336, 170))
+
+            label = "3_"
             # row -> y , col -> x
-            row, col = 13, 35  # row + 83, col + 56
+            row, col = 8, 76
+
+            # region
+            label += self.region_list_y[i % 16]
+            Plate[row:row + 60, col:col + 88, :] = region[i % 16]
+            col += 88 + 8
+
             # number 1
             rand_int = int(plate_chars[0])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 56, :] = number[rand_int]
-            col += 56
+            label += self.number_list_y[rand_int]
+            Plate[row:row + 60, col:col + 44, :] = number1[rand_int]
+            col += 44
 
             # number 2
             rand_int = int(plate_chars[1])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 56, :] = number[rand_int]
-            col += 56
+            label += self.number_list_y[rand_int]
+            Plate[row:row + 60, col:col + 44, :] = number1[rand_int]
+
+            row, col = 72, 8
 
             # character 3
             label += plate_chars[2]
             try:
-                Plate[row:row + 83, col:col + 60, :] = cv2.resize(self.Char1[plate_chars[2]], (60, 83))
-                col += (60 + 36)
+                Plate[row:row + 62, col:col + 64, :] = cv2.resize(self.Char1_y[plate_chars[2]], (64, 62))
+                # Plate[row:row + 68, col:col + 70, :] = cv2.resize(self.Char1_y[plate_chars[2]], (70, 68))
+                col += 64
             except:
                 print(plate_chars[2])
             
             # number 4
             rand_int = int(plate_chars[3])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 56, :] = number[rand_int]
-            col += 56
+            label += self.number_list_y[rand_int]
+            Plate[row:row + 90, col:col + 64, :] = number2[rand_int]
+            col += 64
 
             # number 5
             rand_int = int(plate_chars[4])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 56, :] = number[rand_int]
-            col += 56
+            label += self.number_list_y[rand_int]
+            Plate[row:row + 90, col:col + 64, :] = number2[rand_int]
+            col += 64
 
             # number 6
             rand_int = int(plate_chars[5])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 56, :] = number[rand_int]
-            col += 56
+            label += self.number_list_y[rand_int]
+            Plate[row:row + 90, col:col + 64, :] = number2[rand_int]
+            col += 64
 
             # number 7
             rand_int = int(plate_chars[6])
-            label += self.number_list[rand_int]
-            Plate[row:row + 83, col:col + 56, :] = number[rand_int]
-            col += 56
+            label += self.number_list_y[rand_int]
+            Plate[row:row + 90, col:col + 64, :] = number2[rand_int]
+            
             Plate = random_bright(Plate)
             if save:
-                tfs = albumentations.Compose([Affine(rotate=[-7, 7], shear=None, p=0.5),
-                                 Perspective(scale=(0.05, 0.12), p=0.5)])
-                Plate = tfs(image=Plate)
-                cv2.imwrite(self.save_path + label + ".jpg", Plate["image"])
+                cv2.imwrite(self.save_path + label + ".jpg", Plate)
+            else:
+                cv2.imshow(label, Plate)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
+    def Type_4(self, num, plate, save=False):
+        
+        number1 = [cv2.resize(number, (44, 60)) for number in self.Number_g]
+        number2 = [cv2.resize(number, (64, 90)) for number in self.Number_g]
+        region = [cv2.resize(region, (88, 60)) for region in self.Region_g]
+        
+        plate_chars = []
+        for char in plate:
+            plate_chars.append(char)
+
+        for i, Iter in enumerate(range(num)):
+            Plate = cv2.resize(self.plate3, (336, 170))
+
+            label = "4_"
+            # row -> y , col -> x
+            row, col = 8, 76
+
+            # region
+            label += self.region_list_g[i % 16]
+            Plate[row:row + 60, col:col + 88, :] = region[i % 16]
+            col += 88 + 8
+
+            # number 1
+            rand_int = int(plate_chars[0])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 60, col:col + 44, :] = number1[rand_int]
+            col += 44
+
+            # number 2
+            rand_int = int(plate_chars[1])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 60, col:col + 44, :] = number1[rand_int]
+
+            row, col = 72, 8
+
+            # character 3
+            label += plate_chars[2]
+            try:
+                Plate[row:row + 62, col:col + 64, :] = cv2.resize(self.Char1_g[plate_chars[2]], (64, 62))
+                col += 64
+            except:
+                print(plate_chars[2])
+
+            # number 4
+            rand_int = int(plate_chars[3])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 90, col:col + 64, :] = number2[rand_int]
+            col += 64
+
+            # number 5
+            rand_int = int(plate_chars[4])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 90, col:col + 64, :] = number2[rand_int]
+            col += 64
+
+            # number 6
+            rand_int = int(plate_chars[5])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 90, col:col + 64, :] = number2[rand_int]
+            col += 64
+
+            # number 7
+            rand_int = int(plate_chars[6])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 90, col:col + 64, :] = number2[rand_int]
+            Plate = random_bright(Plate)
+            if save:
+                cv2.imwrite(self.save_path + label + ".jpg", Plate)
+            else:
+                cv2.imshow(label, Plate)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
+    def Type_5(self, num, plate, save=False):
+        
+        number1 = [cv2.resize(number, (60, 65)) for number in self.Number_g]
+        number2 = [cv2.resize(number, (80, 90)) for number in self.Number_g]
+        # char = [cv2.resize(char1, (60, 65)) for char1 in self.Char1_g]
+        
+        plate_chars = []
+        for char in plate:
+            plate_chars.append(char)
+
+        for i, Iter in enumerate(range(num)):
+            Plate = cv2.resize(self.plate3, (336, 170))
+            random_width, random_height = 336, 170
+            label = "5_"
+
+            # row -> y , col -> x
+            row, col = 8, 78
+
+            # number 1
+            rand_int = int(plate_chars[0])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 65, col:col + 60, :] = number1[rand_int]
+            col += 60
+
+            # number 2
+            rand_int = int(plate_chars[1])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 65, col:col + 60, :] = number1[rand_int]
+            col += 60
+
+            # character 3
+            label += plate_chars[2]
+            try:
+                Plate[row:row + 65, col:col + 60, :] = cv2.resize(self.Char1_g[plate_chars[2]], (60, 65))
+            except:
+                print(plate_chars[2])
+            
+            row, col = 75, 8
+            # number 4
+            rand_int = int(plate_chars[3])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 90, col:col + 80, :] = number2[rand_int]
+            col += 80
+
+
+            # number 5
+            rand_int = int(plate_chars[4])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 90, col:col + 80, :] = number2[rand_int]
+            # Plate[row:row + 90, col:col + 80, :] = cv2.resize(number2[rand_int], (58, 90))
+            col += 80
+
+            # number 6
+            rand_int = int(plate_chars[5])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 90, col:col + 80, :] = number2[rand_int]
+            col += 80
+
+            # number 7
+            rand_int = int(plate_chars[6])
+            label += self.number_list_g[rand_int]
+            Plate[row:row + 90, col:col + 80, :] = number2[rand_int]
+
+            Plate = random_bright(Plate)
+
+            if save:
+                cv2.imwrite(self.save_path + label + ".jpg", Plate)
             else:
                 cv2.imshow(label, Plate)
                 cv2.waitKey(0)
@@ -185,7 +433,7 @@ class ImageGenerator:
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--img_dir", help="save image directory",
-                    type=str, default="./new_samples/augmented/")
+                    type=str, default="./new_samples/to_test/")
 parser.add_argument("-n", "--num", help="number of image",
                     type=int, default=3)
 parser.add_argument("-s", "--save", help="save or imshow",
@@ -210,18 +458,18 @@ Save = args.save
 
 plates = args.plates
 
-df = pd.read_csv("/home/ubuntu/workspace/bekhzod/imagen/lp_recognition_cropped/labels.csv")
-texts = []
-for i, name in (enumerate(df['filename'])):
-    if i == 10000:
-        break
-    plate_num = os.path.splitext(name)[0]
-    if len(plate_num) < 8:
-        texts.append(plate_num)
+# df = pd.read_csv("/home/ubuntu/workspace/bekhzod/imagen/lp_recognition_cropped/labels.csv")
+# texts = []
+# for i, name in (enumerate(df['filename'])):
+#     if i == 10000:
+#         break
+#     plate_num = os.path.splitext(name)[0]
+#     if len(plate_num) < 8:
+#         texts.append(plate_num)
 
-for idx in range(1, len(texts) + 1):
-    A.Type_1(idx, texts[idx - 1], save=Save)
-    print(f"Plate {texts[idx - 1]} is generated and saved in {img_dir} as {texts[idx - 1]}.jpg!")
+# for idx in range(1, len(texts) + 1):
+#     A.Type_1(idx, texts[idx - 1], save=Save)
+#     print(f"Plate {texts[idx - 1]} is generated and saved in {img_dir} as {texts[idx - 1]}.jpg!")
 
 
 # for idx in range(1, len(plates) + 1):
@@ -244,15 +492,14 @@ for idx in range(1, len(texts) + 1):
 #         img.distort('arc', (15, ))
 #         img.save(filename=f"{img_dir}{plates[idx - 1]}.png")
         
-# for idx in range(1, len(plates) + 1):
-#     A.Type_1(idx, plates[idx - 1], save=Save)
-#     print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")
-
-# A.Type_2(num_img, save=Save)
-# print("Type 2 finish")
-# A.Type_3(num_img, save=Save)
-# print("Type 3 finish")
-# A.Type_4(num_img, save=Save)
-# print("Type 4 finish")
-# A.Type_5(num_img, save=Save)
-# print("Type 5 finish")
+for idx in range(23, len(plates) + 1):
+    A.Type_1(idx, plates[idx - 1], save=Save)
+    print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")
+    # A.Type_2(idx, plates[idx - 1], save=Save)
+    # print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")
+    # A.Type_3(idx, plates[idx - 1], save=Save)
+    # print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")
+    # A.Type_4(idx, plates[idx - 1], save=Save)
+    # print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")
+    # A.Type_5(idx, plates[idx - 1], save=Save)
+    # print(f"Plate {plates[idx - 1]} is generated and saved in {img_dir} as {plates[idx - 1]}.jpg!")

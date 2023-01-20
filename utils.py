@@ -28,13 +28,13 @@ def partial_write(Plate, label, num_list, num_ims, plate_chars, num_size, row, c
     plate_int = int(plate_chars[-3])
     label += num_list[plate_int]
     Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[-3]], num_size)
-    col += num_size[0]
+    col += num_size[0] 
 
     # number 6
     plate_int = int(plate_chars[-2])
     label += num_list[plate_int]
     Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[-2]], num_size)
-    col += num_size[0]
+    col += num_size[0] 
 
     # number 7
     plate_int = int(plate_chars[-1])
@@ -44,7 +44,7 @@ def partial_write(Plate, label, num_list, num_ims, plate_chars, num_size, row, c
     
     return Plate, label
     
-def write(Plate, label, num_list, num_ims, init_size, plate_chars, num_size, num_size_2, char_ims, char_size, label_prefix, row, col):
+def write(Plate, label, num_list, num_ims, init_size, three_digit, plate_chars, num_size, num_size_2, char_ims, char_size, label_prefix, row, col):
     
     # number 1
     plate_int = int(plate_chars[0])
@@ -58,17 +58,15 @@ def write(Plate, label, num_list, num_ims, init_size, plate_chars, num_size, num
     Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[1]], num_size)
     col += num_size[0]
     
-#     if len(plate_chars) > 7:
+    if three_digit:
         
-#         plate_int = int(plate_chars[2])
-#         label += num_list[plate_int]
-#         Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[2]], num_size)
-#         col += num_size[0]
+        plate_int = int(plate_chars[2])
+        label += num_list[plate_int]
+        Plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[plate_chars[2]], num_size)
+        col += num_size[0]
 
     if label_prefix == "yellow" or label_prefix == "old":
         row, col = 72, 8
-    else:
-        pass
 
     # character 3
     if label_prefix == "short" or label_prefix == "long":
@@ -128,14 +126,25 @@ def load(files_path):
         
     return ims, chars
 
-def preprocess(plate_path, plate_size, label_prefix, init_size):
+def preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars):
     
     Plate = cv2.resize(cv2.imread(plate_path), plate_size)
     label = f"{label_prefix}_" 
-    # row -> y , col -> x
-    row, col = init_size[0], init_size[1]  # row + 83, col + 56
+    row, col = init_size[0], init_size[1]
     
-    return Plate, label, row, col
+    if len(plate_chars) > 7:
+        
+        three_digit = True
+        if label_prefix == "long":
+            row, col = init_size[0] + 2, init_size[1] - 18 
+        elif label_prefix == "short":
+            row, col = init_size[0] - 5, init_size[1] - 5 
+        elif label_prefix in ["old", "yellow"]:
+            row, col = init_size[0], init_size[1] - 20 
+        elif label_prefix == "green":
+            row, col = init_size[0], init_size[1] - 35 
+    
+    return Plate, label, row, col, three_digit
     
 
 def generate_plate(plate_path, plate, plate_size, num_size, num_size_2,
@@ -144,17 +153,15 @@ def generate_plate(plate_path, plate, plate_size, num_size, num_size_2,
     
     plate_chars = [char for char in plate]
 
-    Plate, label, row, col = preprocess(plate_path, plate_size, label_prefix, init_size)
+    Plate, label, row, col, three_digit = preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars)
 
     if label_prefix == "yellow" or label_prefix == "old":
-        Plate[row:row + region_size[1], col:col + region_size[0], :] = cv2.resize(regions[region_name], region_size) # 88,60
+        Plate[row:row + region_size[1], col:col + region_size[0], :] = cv2.resize(regions[region_name], region_size)
         col += region_size[0] + 8
-    else:
-        pass
 
     Plate, label = write(Plate=Plate, label=label, num_list=num_list, num_ims=num_ims, 
-                         init_size=init_size, plate_chars=plate_chars, num_size=num_size, 
+                         init_size=init_size, three_digit=three_digit, plate_chars=plate_chars, 
                          num_size_2=num_size_2, char_ims=char_ims, char_size=char_size, 
-                         label_prefix=label_prefix, row=row, col=col)
+                         label_prefix=label_prefix, row=row, num_size=num_size, col=col)
 
     if save_: save(save, Plate, save_path, label)

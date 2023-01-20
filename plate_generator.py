@@ -20,13 +20,13 @@ class PlateGenerator:
         self.Char1_g, self.char_list_g = load("./char1_g/")
         self.Region_g, self.region_list_g = load("./region_g/")
 
-    def Generation(self, num, plate, save, plate_type):
+    def Generation(self, plate, save, plate_type):
         
-        assert plate_type in ["short", "long", "yellow", "green_old", "green"], "Please choose the correct the plate type"
+        assert plate_type in ["short", "long", "yellow", "old", "green"], "Please choose the correct the plate type"
         
         if plate_type == "short":
             generate_plate(plate_path="plate.jpg", 
-                       plate=plate, num=num, num_size=(45, 83), num_size_2=None, 
+                       plate=plate, num_size=(45, 83), num_size_2=None, 
                        num_list=self.number_list, init_size=(46, 10),
                        char_list=self.char_list, regions=None,
                        num_ims=self.Number, char_size=(49, 70),  region_name=None,
@@ -36,7 +36,7 @@ class PlateGenerator:
         
         elif plate_type == "long":
             generate_plate(plate_path="plate.jpg", 
-                       plate=plate, num=num, num_size=(56, 83), num_size_2=None, 
+                       plate=plate, num_size=(56, 83), num_size_2=None, 
                        num_list=self.number_list, init_size=(13, 36), # start from left to right
                        char_list=self.char_list, regions=None,
                        num_ims=self.Number, char_size=(60, 83), region_name=None,
@@ -46,7 +46,7 @@ class PlateGenerator:
             
         elif plate_type == "yellow":
             generate_plate(plate_path="plate_y.jpg", 
-                       plate=plate, num=num, num_size=(44, 60), num_size_2=(64, 90), 
+                       plate=plate, num_size=(44, 60), num_size_2=(64, 90), 
                        num_list=self.number_list_y, char_list=self.char_list_y,
                        num_ims=self.Number_y, char_ims=self.Char1_y,
                        init_size=(8, 76), # start from left to right
@@ -56,9 +56,9 @@ class PlateGenerator:
                        save_path=self.save_path, region_size=(88, 60),
                        save_=save, plate_size=(336, 170))
             
-        elif plate_type == "green_old":
+        elif plate_type == "old":
             generate_plate(plate_path="plate_g.jpg", 
-                       plate=plate, num=num, num_size=(44, 60), num_size_2=(64, 90), 
+                       plate=plate, num_size=(44, 60), num_size_2=(64, 90), 
                        num_list=self.number_list_g, char_list=self.char_list_g,
                        num_ims=self.Number_g, char_ims=self.Char1_g,
                        init_size=(8, 76), # start from left to right
@@ -70,7 +70,7 @@ class PlateGenerator:
             
         elif plate_type == "green":
             generate_plate(plate_path="plate_g.jpg", 
-                       plate=plate, num=num, num_size=(60, 65), num_size_2=(80, 90), 
+                       plate=plate, num_size=(60, 65), num_size_2=(80, 90), 
                        num_list=self.number_list_g, char_list=self.char_list_g,
                        num_ims=self.Number_g, char_ims=self.Char1_g, region_size=None,
                        init_size=(8, 78), # start from left to right

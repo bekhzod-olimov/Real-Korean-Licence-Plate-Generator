@@ -72,9 +72,11 @@ def write(Plate, label, num_list, num_ims, init_size, three_digit, plate_chars, 
     if label_prefix == "short" or label_prefix == "long":
 
         label += plate_chars[-5]
-        # try:
-        Plate[row:row + char_size[1], col:col + char_size[0], :] = cv2.resize(char_ims[plate_chars[-5]], char_size)
-
+        try:
+            Plate[row:row + char_size[1], col:col + char_size[0], :] = cv2.resize(char_ims[plate_chars[-5]], char_size)
+        except:
+            print(plate_chars[-5])
+            
         if label_prefix == "short":
             col += (char_size[0] + init_size[1])
         else:
@@ -98,20 +100,20 @@ def write(Plate, label, num_list, num_ims, init_size, three_digit, plate_chars, 
         
     return Plate, label
 
-def save(save, Plate, save_path, label):
+def save(Plate, save_path, transformations, label):
     
-    Plate = random_bright(Plate)
-    if save:
-        # tfs = albumentations.Compose([Affine(rotate=[-7, 7], shear=None, p=0.5),
-        #                  Perspective(scale=(0.05, 0.12), p=0.5)])
-        # Plate = tfs(image=Plate)
-        folder = label.split('_')[0]
-        save_dir = os.path.join(save_path, folder)
-        os.makedirs(save_dir, exist_ok = True)
-        cv2.imwrite(os.path.join(save_dir, f"{label.split('_')[1]}") + ".jpg", Plate)
-        print(f"Plate {label.split('_')[1]}.jpg is saved to {save_dir}/!")
-    else:
-        pass
+    if transformations:
+        Plate = random_bright(Plate)
+        tfs = albumentations.Compose([Affine(rotate=[-7, 7], shear=None, p=0.5),
+                         Perspective(scale=(0.05, 0.12), p=0.5)])
+        Plate = tfs(image=Plate)["image"]
+        # print(type(Plate))
+    
+    folder = label.split('_')[0]
+    save_dir = os.path.join(save_path, folder)
+    os.makedirs(save_dir, exist_ok = True)
+    cv2.imwrite(os.path.join(save_dir, f"{label.split('_')[1]}") + ".jpg", Plate)
+    print(f"Plate {label.split('_')[1]}.jpg is saved to {save_dir}/!")
 
 def load(files_path):
     
@@ -126,7 +128,7 @@ def load(files_path):
         
     return ims, chars
 
-def preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars):
+def preprocess(plate_path, plate_size, label_prefix, init_size, three_digit, plate_chars):
     
     Plate = cv2.resize(cv2.imread(plate_path), plate_size)
     label = f"{label_prefix}_" 
@@ -148,12 +150,11 @@ def preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars):
     
 
 def generate_plate(plate_path, plate, plate_size, num_size, num_size_2,
-                   char_size, init_size, num_list, char_list, num_ims, char_ims, 
+                   char_size, init_size, num_list, three_digit, char_list, num_ims, char_ims, 
                    regions, region_name, region_size, save_path, label_prefix, save_):
     
     plate_chars = [char for char in plate]
-
-    Plate, label, row, col, three_digit = preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars)
+    Plate, label, row, col, three_digit = preprocess(plate_path, plate_size, label_prefix, init_size, three_digit, plate_chars)
 
     if label_prefix == "yellow" or label_prefix == "old":
         Plate[row:row + region_size[1], col:col + region_size[0], :] = cv2.resize(regions[region_name], region_size)
@@ -164,4 +165,4 @@ def generate_plate(plate_path, plate, plate_size, num_size, num_size_2,
                          num_size_2=num_size_2, char_ims=char_ims, char_size=char_size, 
                          label_prefix=label_prefix, row=row, num_size=num_size, col=col)
 
-    if save_: save(save, Plate, save_path, label)
+    if save_: save(Plate=Plate, save_path=save_path, transformations=True, label=label)

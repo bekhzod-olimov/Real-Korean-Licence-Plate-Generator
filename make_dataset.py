@@ -3,10 +3,10 @@ import numpy as np
 from glob import glob
 
 parser = argparse.ArgumentParser('Make Dataset for CUT train')
-parser.add_argument('--in_im_paths', help = 'Input Images Path', type = str, default='/home/ubuntu/workspace/bekhzod/imagen/Korean-license-plate-Generator/new_samples/augmented')
-parser.add_argument('--out_im_paths', help='Output Images Path', type = str, default='/home/ubuntu/workspace/bekhzod/imagen/lp_recognition_cropped/val')
-parser.add_argument('--trainA', help = 'trainA Path', type = str, default='/home/ubuntu/workspace/bekhzod/cut/datasets/train_data/trainA')
-parser.add_argument('--trainB', help='trainB Path', type = str, default='/home/ubuntu/workspace/bekhzod/cut/datasets/train_data/trainB')
+parser.add_argument('--in_im_paths', help = 'Input Images Path', type = str, default='/home/ubuntu/workspace/bekhzod/imagen/Korean-license-plate-Generator/new_samples/to_test/long')
+parser.add_argument('--out_im_paths', help='Output Images Path', type = str, default='/home/ubuntu/workspace/bekhzod/imagen/lp_recognition_cropped/train')
+parser.add_argument('--trainA', help = 'trainA Path', type = str, default='/home/ubuntu/workspace/bekhzod/cut/datasets/train_data_new_3digit/trainA')
+parser.add_argument('--trainB', help='trainB Path', type = str, default='/home/ubuntu/workspace/bekhzod/cut/datasets/train_data_new_3digit/trainB')
 parser.add_argument('--num_imgs', dest='num_ims', help='number of images', type=int, default=1000000)
 args = parser.parse_args()
 
@@ -28,4 +28,7 @@ for i, path in enumerate(input_im_paths):
     #     break
     im_name = os.path.basename(path)
     shutil.copy(path, args.trainA)
-    shutil.copy(f"{args.out_im_paths}/{im_name}", args.trainB)
+    try:
+        shutil.copy(f"{args.out_im_paths}/{im_name}", args.trainB)
+    except:
+        print(f"{args.out_im_paths}/{im_name} is not found!")

@@ -18,8 +18,6 @@ generator = PlateGenerator(img_dir)
 # num_img = args.num
 Save = args.save
 
-plates = args.plates
-
 # df = pd.read_csv("/home/ubuntu/workspace/bekhzod/imagen/lp_recognition_cropped/train/labels.csv")
 df = pd.read_csv("test.csv")
 texts = []
@@ -35,6 +33,7 @@ for idx, im_path in enumerate(texts):
         region_name = split_[:2]
         digits = split_[2:]
         generator.Generation(digits, save=Save, plate_type="yellow", region_name=region_name)
+
+
+
         
-
-

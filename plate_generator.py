@@ -47,6 +47,7 @@ class PlateGenerator:
             
         elif plate_type == "yellow":
             assert region_name != None, "Please insert a region name"
+            assert region_name in [os.path.basename(region) for region in self.region_list_y], f"Please choose one of these regions: {[os.path.basename(region) for region in self.region_list_y]}"
             generate_plate(plate_path="plate_y.jpg", 
                        plate=plate, num_size=(44, 60), num_size_2=(64, 90), 
                        num_list=self.number_list_y, char_list=self.char_list_y,

@@ -1,5 +1,6 @@
-import argparse
+import argparse, os
 from plate_generator import PlateGenerator
+import pandas as pd
 
     
 parser = argparse.ArgumentParser()
@@ -19,19 +20,27 @@ parser.add_argument("-p", "--plates", help="plate to generate",
                                         "57두6974", "57너3564", "87로5755",
                                         "13소1489", "24자1789", "144육4785",])
 args = parser.parse_args()
-
-
 img_dir = args.img_dir
-A = PlateGenerator(img_dir)
+generator = PlateGenerator(img_dir)
 
 num_img = args.num
 Save = args.save
 
 plates = args.plates
 
-for idx in range(24, len(plates) + 1):
-    A.Generation(plates[idx - 1], save=Save, plate_type="long")
-    A.Generation(plates[idx - 1], save=Save, plate_type="short")
-    A.Generation(plates[idx - 1], save=Save, plate_type="yellow")
-    A.Generation(plates[idx - 1], save=Save, plate_type="old")
-    A.Generation(plates[idx - 1], save=Save, plate_type="green")
+# for idx in range(24, len(plates) + 1):
+#     generator.Generation(plates[idx - 1], save=Save, plate_type="long")
+#     generator.Generation(plates[idx - 1], save=Save, plate_type="short")
+#     generator.Generation(plates[idx - 1], save=Save, plate_type="yellow")
+#     generator.Generation(plates[idx - 1], save=Save, plate_type="old")
+#     generator.Generation(plates[idx - 1], save=Save, plate_type="green")
+
+df = pd.read_csv("/home/ubuntu/workspace/bekhzod/imagen/lp_recognition_cropped/train/labels.csv")
+texts = []
+for i, name in (enumerate(df['filename'])):
+    plate_num = os.path.splitext(name)[0]
+    if len(plate_num) < 9:
+        texts.append(plate_num)
+        
+for idx, im_path in enumerate(texts):
+    generator.Generation(im_path, save=Save, plate_type="long")

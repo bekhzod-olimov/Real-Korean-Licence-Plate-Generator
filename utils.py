@@ -109,7 +109,8 @@ def write(Plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
         try:
             Plate[row:row + char_size[1], col:col + char_size[0], :] = cv2.resize(char_ims[plate_int], char_size)
         except:
-            print(plate_chars[-5])
+            print("\n!!!!!!!!!!!! FILE MISSING ERROR !!!!!!!!!!!!")
+            print(f"Character {plate_chars[-5]} is missing!\n")
             
         if label_prefix == "short":
             col += (char_size[0] + init_size[1])
@@ -132,7 +133,8 @@ def write(Plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
             if label_prefix == "green":
                 row, col = 75, 8
         except:
-            print(plate_chars[-5])
+            print("\n!!!!!!!!!!!! FILE MISSING ERROR !!!!!!!!!!!!")
+            print(f"Character {plate_chars[-5]} is missing!\n")
     
     if num_size_2 != None:
         Plate, label = partial_write(Plate, label, num_list, num_ims, plate_chars, num_size_2, row, col, random)

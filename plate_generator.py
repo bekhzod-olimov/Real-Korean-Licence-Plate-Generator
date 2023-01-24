@@ -8,24 +8,24 @@ class PlateGenerator:
         self.random = random
 
         # Basic nums and chars
-        self.num_ims, self.num_lists = load("./num/")
-        self.char_ims, self.char_lists = load("./char1/")
+        self.num_ims, self.num_lists = load("./digits/")
+        self.char_ims, self.char_lists = load("./characters/")
 
         # Yellow nums and chars
-        self.num_ims_yellow, self.num_lists_yellow = load("./num_y/")
-        self.char_ims_yellow, self.char_lists_yellow = load("./char1_y/")
-        self.regions_yellow, self.regions_lists_yellow = load("./region_y/")
+        self.num_ims_yellow, self.num_lists_yellow = load("./digits_yellow/")
+        self.char_ims_yellow, self.char_lists_yellow = load("./characters_yellow/")
+        self.regions_yellow, self.regions_lists_yellow = load("./regions_yellow/")
        
         # Green nums and chars
-        self.num_ims_green, self.num_lists_green = load("./num_g/")
-        self.char_ims_green, self.char_lists_green = load("./char1_g/")
-        self.regions_green, self.regions_lists_green = load("./region_g/")
+        self.num_ims_green, self.num_lists_green = load("./digits_green/")
+        self.char_ims_green, self.char_lists_green = load("./characters_green/")
+        self.regions_green, self.regions_lists_green = load("./regions_green/")
         
         
     def generate(self, plate, save, plate_type, region_name):
         
         if plate_type == "long":
-                    generate_plate(plate_path="plate.jpg", random=self.random,
+                    generate_plate(plate_path="plates/plate.jpg", random=self.random,
                                plate=plate, num_size=(56, 83), num_size_2=None, 
                                num_list=self.num_lists, init_size=(13, 36), # start from left to right
                                char_list=self.char_lists, regions=None, three_digit = None,
@@ -35,7 +35,7 @@ class PlateGenerator:
                                save_=save, plate_size=(520, 110))
 
         elif plate_type == "short":
-            generate_plate(plate_path="plate.jpg",  random=self.random,
+            generate_plate(plate_path="plates/plate.jpg",  random=self.random,
                        plate=plate, num_size=(40, 83), num_size_2=None, 
                        num_list=self.num_lists, init_size=(46, 10),
                        char_list=self.char_lists, regions=None, three_digit = None,
@@ -47,7 +47,7 @@ class PlateGenerator:
         elif plate_type == "yellow":
             assert region_name != None, "Please insert a region name"
             assert region_name in [os.path.basename(region) for region in self.regions_lists_yellow], f"Please choose one of these regions: {[os.path.basename(region) for region in self.region_list_y]}"
-            generate_plate(plate_path="plate_y.jpg",  random=self.random,
+            generate_plate(plate_path="plates/plate_y.jpg",  random=self.random,
                        plate=plate, num_size=(44, 60), num_size_2=(64, 90), 
                        num_list=self.num_lists_yellow, char_list=self.char_lists_yellow,
                        num_ims=self.num_ims_yellow, char_ims=self.char_ims_yellow,
@@ -60,7 +60,7 @@ class PlateGenerator:
 
         elif plate_type == "old":
             assert region_name != None, "Please insert a region name"
-            generate_plate(plate_path="plate_g.jpg", 
+            generate_plate(plate_path="plates/plate_g.jpg", 
                        plate=plate, num_size=(44, 60), num_size_2=(64, 90), 
                        num_list=self.num_lists_green, char_list=self.char_lists_green,
                        num_ims=self.num_ims_green, char_ims=self.char_ims_green,
@@ -72,7 +72,7 @@ class PlateGenerator:
                        save_=save, plate_size=(336, 170))
 
         elif plate_type == "green":
-            generate_plate(plate_path="plate_g.jpg", 
+            generate_plate(plate_path="plates/plate_g.jpg", 
                        plate=plate, num_size=(60, 65), num_size_2=(80, 90), 
                        num_list=self.num_lists_green, char_list=self.char_lists_green,
                        num_ims=self.num_ims_green, char_ims=self.char_ims_green, region_size=None,

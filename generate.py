@@ -21,7 +21,7 @@ data_path = args.data_path
 random = args.random
 Save = args.save
 sample = "100마0000"
-sample = "서울17마0000"
+# sample = "서울17마0000"
 
 if random:
     generator = PlateGenerator(save_path=save_path, random=random)
@@ -36,6 +36,14 @@ if random:
 
 else:
     generator = PlateGenerator(save_path=save_path, random=random)
-
-
+    df = pd.read_csv("test.csv")
+    texts = [os.path.basename(filename) for filename in df["filename"]]
     
+    for sample in texts:
+        if len(sample) > 8:
+            split_ = os.path.splitext(os.path.basename(sample))[0]
+            region_name = split_[:2]
+            digits = split_[2:]
+            generator.Generation(digits, save=Save, plate_type="yellow", region_name=region_name)
+        else:
+            generator.Generation(sample, save=Save, plate_type="long")

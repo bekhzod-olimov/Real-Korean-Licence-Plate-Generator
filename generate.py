@@ -13,7 +13,7 @@ parser.add_argument("-n", "--num", help="number of image",
 parser.add_argument("-s", "--save", help="save or imshow",
                     type=bool, default=True)
 parser.add_argument("-r", "--random", help="Random plate numbers",
-                    type=bool, default=True)
+                    type=bool, default=False)
 
 args = parser.parse_args()
 save_path = args.save_path
@@ -21,7 +21,7 @@ data_path = args.data_path
 random = args.random
 Save = args.save
 sample = "100마0000"
-# sample = "서울17마0000"
+sample = "서울17마0000"
 
 if random:
     generator = PlateGenerator(save_path=save_path, random=random)

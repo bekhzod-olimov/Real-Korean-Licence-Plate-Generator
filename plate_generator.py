@@ -22,6 +22,12 @@ class PlateGenerator:
         self.regions_green, self.regions_lists_green = load("./regions_green/")
         
         
+    def assertion(self, region_name, region_names):
+        
+        assert region_name != None, "Please insert a region name"
+        assert region_name in [os.path.basename(region) for region in region_names], f"Please choose one of these regions: {[os.path.basename(region) for region in region_names]}"
+        
+    
     def generate(self, plate, save, plate_type, region_name):
         
         if plate_type == "long":
@@ -45,8 +51,9 @@ class PlateGenerator:
                        save_=save, plate_size=(355, 155))
 
         elif plate_type == "yellow":
-            assert region_name != None, "Please insert a region name"
-            assert region_name in [os.path.basename(region) for region in self.regions_lists_yellow], f"Please choose one of these regions: {[os.path.basename(region) for region in self.region_list_y]}"
+            
+            self.assertion(region_name, self.regions_lists_yellow)
+            
             generate_plate(plate_path="plates/plate_y.jpg",  random=self.random,
                        plate=plate, num_size=(44, 60), num_size_2=(64, 90), 
                        num_list=self.num_lists_yellow, char_list=self.char_lists_yellow,
@@ -59,7 +66,9 @@ class PlateGenerator:
                        save_=save, plate_size=(336, 170))
 
         elif plate_type == "old":
-            assert region_name != None, "Please insert a region name"
+            
+            self.assertion(region_name, self.regions_lists_yellow)
+            
             generate_plate(plate_path="plates/plate_g.jpg", 
                        plate=plate, num_size=(44, 60), num_size_2=(64, 90), 
                        num_list=self.num_lists_green, char_list=self.char_lists_green,
@@ -82,7 +91,7 @@ class PlateGenerator:
                        save_=save, plate_size=(336, 170))
         
 
-    def Generation(self, plate, save, plate_type, num=None, region_name=None):
+    def generation(self, plate, save, plate_type, num=None, region_name=None):
         
         assert plate_type in ["short", "long", "yellow", "old", "green"], "Please choose the correct the plate type"
         

@@ -174,3 +174,4 @@ def generate_plate(plate_path, plate, plate_size, num_size, random,
                          label_prefix=label_prefix, row=row, num_size=num_size, col=col)
 
     if save_: save(Plate=Plate, save_path=save_path, transformations=False, label=label)
+       

@@ -13,13 +13,20 @@ def get_di(ims_list):
 
 def read_ims(ims_list): return [cv2.cvtColor(cv2.imread(im), cv2.COLOR_BGR2RGB) for im in ims_list]
     
-def visualize(ims_list, ims, ims_len):
+def plot(rows, ims, ims_list, ims_len, i):
     
-    plt.figure(figsize=(25, 4))
+    plt.subplot(rows, ims_len, i+1)
+    plt.imshow(ims[i])
+    plt.title(f"{ims_list[i]}")
+    plt.axis('off')
+    
+def visualize(ims_list, ims, ims_len, rows = 1):
+    
+    if len(ims_list) > 7 and len(ims_list) % 2 == 0: rows = 2
+
+    if rows == 1: plt.figure(figsize=(25, 4))        
+    else: plt.figure(figsize=(25, 6))        
 
     for i in range(ims_len):
-        
-        plt.subplot(1, ims_len, i+1)
-        plt.imshow(ims[i])
-        plt.title(f"{ims_list[i]}")
-        plt.axis('off')
+        if rows == 1: plot(rows, ims, ims_list, ims_len, i)
+        else: plot(rows, ims, ims_list, ims_len // 2, i)

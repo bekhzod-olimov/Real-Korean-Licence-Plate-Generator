@@ -9,7 +9,7 @@ parser.add_argument("-dp", "--data_path", help="Path to the csv file",
 parser.add_argument("-sp", "--save_path", help="save image directory",
                     type=str, default="./new_samples/to_test_new/")
 parser.add_argument("-np", "--number_of_plates", help="number of image",
-                    type=int, default=2)
+                    type=int, default=15)
 parser.add_argument("-s", "--save", help="save or imshow",
                     type=bool, default=True)
 parser.add_argument("-r", "--random", help="Random plate numbers",
@@ -21,20 +21,28 @@ data_path = args.data_path
 random = args.random
 number_of_plates = args.number_of_plates
 Save = args.save
-sample = "01A272AA"
+sample = "100마0000"
+# sample = "서울17마0000"
 
 def split_and_generate(generator, sample, save, num):
     
-    split_ = os.path.splitext(os.path.basename(sample))[0]
-    region = split_[:2]
-    generator.generate(sample, save=Save, num=num, plate_type="long", region=region)
+    if len(sample) > 8:
+        
+        split_ = os.path.splitext(os.path.basename(sample))[0]
+        region_name = split_[:2]
+        digits = split_[2:]
+        generator.generate(digits, save=Save, num=num, plate_type="commercial_europe", region_name=region_name)
+    
+    else:
+        generator.generate(sample, save=Save, num=num, plate_type="basic_north", region_name=None)
 
 if random:
+    
     generator = PlateGenerator(save_path=save_path, random=random)
     split_and_generate(generator, sample=sample, save=Save, num=number_of_plates)    
 
 else:
-    df = pd.read_csv("uzbek.csv")
+    df = pd.read_csv("test.csv")
     texts = [os.path.basename(filename) for filename in df["filename"]]
     generator = PlateGenerator(save_path=save_path, random=random)    
     for sample in texts:

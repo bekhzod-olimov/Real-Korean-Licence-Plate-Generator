@@ -6,6 +6,7 @@ class PlateGenerator:
         
         self.save_path = save_path
         self.random = random
+        self.plate_types = ["basic_europe", "basic_north", "commercial_europe", "commercial_north", "green_old", "green_basic"]
 
         # Basic nums and chars
         self.num_ims, self.num_lists = load("./digits/")
@@ -22,7 +23,7 @@ class PlateGenerator:
         self.char_ims_green, self.char_lists_green = load("./characters_green/")
         self.regions_green, self.regions_lists_green = load("./regions_green/")
         
-    def test(self, plate, random, plate_types):
+    def preprocessing(self, plate, random, plate_types):
         
         if random:
             try:
@@ -32,22 +33,19 @@ class PlateGenerator:
                 init_digit = init_digit_types[int(np.random.choice(np.arange(0, len(init_digit_types)), p=[0.4, 0.6]))]
 
                 if plate_type in ["basic_europe", "basic_north", "green_basic"]: 
-                    three_digit = True if init_digit == "three" else False
-                    plate = "01마0000"
+                    three_digit, plate = True if init_digit == "three" else False, "01마0000"
 
                 elif plate_type in ["commercial_europe", "commercial_north", "green_old"]: 
-                    three_digit = False
-                    plate = "경기01마0101"
+                    three_digit, plate = False, "경기01마0101"
+            
             except:
                 pass
             
         else:
             if plate[0].isalpha(): 
-                three_digit = False
-                plate_type = "commercial_europe"
+                three_digit, plate_type  = False, "commercial_europe"
             elif plate[0].isdigit():
-                three_digit = True if len(plate) > 7 else False
-                plate_type = "basic_europe"
+                three_digit, plate_type = True if len(plate) > 7 else False, "basic_europe"
         
         if plate_type in ["commercial_north", "commercial_europe", "green_old"]:
             
@@ -57,20 +55,17 @@ class PlateGenerator:
         else: digits, region_name = None, None
         
         return three_digit, plate, plate_type, digits, region_name
-            
     
     def assertion(self, region_name, region_names):
         
         assert region_name != None, "Please insert a region name"
         assert region_name in [os.path.basename(region) for region in region_names], f"Please choose one of these regions: {[os.path.basename(region) for region in region_names]}"
     
-    def generate(self, plate, save, plate_type, num, region_name):
-        
-        plate_types = ["basic_europe", "basic_north", "commercial_europe", "commercial_north", "green_old", "green_basic"]
+    def generation(self, plate, save, plate_type, num, region_name):
         
         for _ in range(num):
             
-            three_digit, plate, plate_type, digits, region_name = self.test(plate, self.random, plate_types)
+            three_digit, plate, plate_type, digits, region_name = self.preprocessing(plate, self.random, self.plate_types)
             
             if plate_type == "basic_europe":
                 generate_plate(plate_path="plates/plate.jpg", random=self.random,

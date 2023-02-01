@@ -8,13 +8,13 @@ def run(args):
     generator = PlateGenerator(save_path=args.save_path, random=args.random)
 
     if args.random:
-        generator.generate(save=args.save, num=args.number_of_plates, plate=None, plate_type=None, region_name=None)
+        generator.generation(save=args.save, num=args.number_of_plates, plate=None, plate_type=None, region_name=None)
         
     else:
         df = pd.read_csv(args.data_path)
         texts = [os.path.basename(filename) for filename in df["filename"]]
         for text in texts:
-            generator.generate(text, args.save, num=1, plate_type=None, region_name=None)
+            generator.generation(text, args.save, num=1, plate_type=None, region_name=None)
 
 if __name__ == "__main__":
     

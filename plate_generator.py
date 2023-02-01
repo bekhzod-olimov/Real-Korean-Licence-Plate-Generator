@@ -37,7 +37,7 @@ class PlateGenerator:
             return True if init_digit == "three" else False, "01마0000"
 
         elif plate_type in ["commercial_europe", "commercial_north", "green_old"]: 
-            return True if init_digit == "three" else False, "경기01마0101"
+            return False, "경기01마0101"
     
     def get_region(self, plate):
         
@@ -59,10 +59,8 @@ class PlateGenerator:
         for _ in range(num):
             
             if self.random:
-                plate_type = plate_types[int(np.random.choice(np.arange(0, len(plate_types)), p=[0.3, 0.3, 0.15, 0.15, 0.05, 0.05]))]
+                plate_type = plate_types[int(np.random.choice(np.arange(0, len(plate_types)), p=[0.33, 0.32, 0.15, 0.15, 0.03, 0.02]))]
                 three_digit, plate = self.get_plate(plate_type)
-                print(plate_type)
-                print(three_digit)
             else: plate_type = self.get_plate_type(plate)
         
             if plate_type == "basic_europe":
@@ -141,6 +139,6 @@ class PlateGenerator:
                            num_ims=self.num_ims_green, char_ims=self.char_ims_green, region_size=None,
                            init_size=(8, 78),  random=self.random, all_regions=self.regions_lists_yellow,
                            char_size=(60, 65), label_prefix=plate_type, regions=None,
-                           save_path=self.save_path, region_name=None, three_digit = three_digit,
+                           save_path=self.save_path, region_name=None, three_digit = False,
                            save_=save, plate_size=(336, 170))
         

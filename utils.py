@@ -89,18 +89,12 @@ def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
     col += num_size[0]
 
     # number 2
-    if random:
-        plate_int = int(np.random.randint(low=1, high=9, size=1)) if temp == 0 else int(np.random.randint(low=0, high=9, size=1))
-    else:
-        plate_int = int(plate_chars[1])
-    
-    label += str(num_list[plate_int])
+    label, plate_int = test(random, three_digit, plate_chars, label, num_list, 1)
     plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
     col += num_size[0]
     
     if label_prefix == "commercial_europe":
         pass
-    
     else:    
         if three_digit:
 
@@ -118,8 +112,7 @@ def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
 
     # character 3
     if random:
-        plate_int = int(np.random.randint(low=0, high=9, size=1))
-        plate_int = char_list[plate_int]
+        plate_int = char_list[int(np.random.randint(low=0, high=9, size=1))]
     else:
         plate_int = (plate_chars[-5])
 

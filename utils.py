@@ -18,6 +18,19 @@ def random_bright(img):
     
     return img
 
+
+def test(random, three_digit, plate_chars, label, num_list, char_num):
+    
+    if random:
+        plate_int = int(np.random.randint(low=1, high=9, size=1)) if three_digit else int(np.random.randint(low=0, high=9, size=1))
+    else:
+        plate_int = int(plate_chars[char_num])
+    
+    label += str(num_list[plate_int])
+    
+    return label, plate_int
+
+
 def partial_write(plate, label, num_list, num_ims, plate_chars, num_size, row, col, random):
     
     if random:
@@ -63,15 +76,9 @@ def partial_write(plate, label, num_list, num_ims, plate_chars, num_size, row, c
     
 def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, plate_chars, num_size, num_size_2, char_ims, char_size, label_prefix, row, col, random):
     
-    # number 1
-    if random:
-        plate_int = int(np.random.randint(low=1, high=9, size=1)) if three_digit else int(np.random.randint(low=0, high=9, size=1))
-        temp = plate_int
-    else:
-        plate_int = int(plate_chars[0])
+    label, plate_int = test(random, three_digit, plate_chars, label, num_list, 0)
+    temp = plate_int
 
-    label += str(num_list[plate_int])
-    
     if label_prefix == "basic_north" and three_digit: col -= 20
     elif label_prefix == "basic_europe" and three_digit: col -= 15
     

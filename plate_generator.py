@@ -22,30 +22,42 @@ class PlateGenerator:
         self.char_ims_green, self.char_lists_green = load("./characters_green/")
         self.regions_green, self.regions_lists_green = load("./regions_green/")
         
+    def test(self, plate, random, plate_types):
         
-    def get_plate_type(self, plate):
-        
-        if plate[0].isalpha(): return "commercial_europe"
-        elif plate[0].isdigit(): return "basic_north"
+        if random:
+            try:
+                plate_type = plate_types[int(np.random.choice(np.arange(0, len(plate_types)), p=[0.33, 0.32, 0.15, 0.15, 0.03, 0.02]))]
 
-    def get_plate(self, plate_type):
-        
-        init_digit_types = ["three", "two"]
-        init_digit = init_digit_types[int(np.random.choice(np.arange(0, len(init_digit_types)), p=[0.4, 0.6]))]
-        
-        if plate_type in ["basic_europe", "basic_north", "green_basic"]: 
-            return True if init_digit == "three" else False, "01마0000"
+                init_digit_types = ["three", "two"]
+                init_digit = init_digit_types[int(np.random.choice(np.arange(0, len(init_digit_types)), p=[0.4, 0.6]))]
 
-        elif plate_type in ["commercial_europe", "commercial_north", "green_old"]: 
-            return False, "경기01마0101"
-    
-    def get_region(self, plate):
+                if plate_type in ["basic_europe", "basic_north", "green_basic"]: 
+                    three_digit = True if init_digit == "three" else False
+                    plate = "01마0000"
+
+                elif plate_type in ["commercial_europe", "commercial_north", "green_old"]: 
+                    three_digit = False
+                    plate = "경기01마0101"
+            except:
+                pass
+            
+        else:
+            if plate[0].isalpha(): 
+                three_digit = False
+                plate_type = "commercial_europe"
+            elif plate[0].isdigit():
+                three_digit = True if len(plate) > 7 else False
+                plate_type = "basic_europe"
         
-        split_ = os.path.splitext(os.path.basename(plate))[0]
-        region_name = split_[:2]
-        digits = split_[2:]
+        if plate_type in ["commercial_north", "commercial_europe", "green_old"]:
+            
+            split = os.path.splitext(os.path.basename(plate))[0]
+            region_name, digits = split[:2], split[2:]
+            
+        else: digits, region_name = None, None
         
-        return digits, region_name
+        return three_digit, plate, plate_type, digits, region_name
+            
     
     def assertion(self, region_name, region_names):
         
@@ -58,11 +70,8 @@ class PlateGenerator:
         
         for _ in range(num):
             
-            if self.random:
-                plate_type = plate_types[int(np.random.choice(np.arange(0, len(plate_types)), p=[0.33, 0.32, 0.15, 0.15, 0.03, 0.02]))]
-                three_digit, plate = self.get_plate(plate_type)
-            else: plate_type = self.get_plate_type(plate)
-        
+            three_digit, plate, plate_type, digits, region_name = self.test(plate, self.random, plate_types)
+            
             if plate_type == "basic_europe":
                 generate_plate(plate_path="plates/plate.jpg", random=self.random,
                            plate=plate, num_size=(56, 83), num_size_2=None, 
@@ -85,7 +94,6 @@ class PlateGenerator:
 
             elif plate_type == "commercial_north":
 
-                digits, region_name = self.get_region(plate)
                 self.assertion(region_name, self.regions_lists_yellow)
 
                 generate_plate(plate_path="plates/plate_y.jpg",  random=self.random,
@@ -102,7 +110,6 @@ class PlateGenerator:
 
             elif plate_type == "commercial_europe":
 
-                digits, region_name = self.get_region(plate)
                 self.assertion(region_name, self.regions_lists_yellow)
 
                 generate_plate(plate_path="plates/plate_y.jpg",  random=self.random,
@@ -118,7 +125,6 @@ class PlateGenerator:
 
             elif plate_type == "green_old":
                 
-                digits, region_name = self.get_region(plate)
                 self.assertion(region_name, self.regions_lists_yellow)
 
                 generate_plate(plate_path="plates/plate_g.jpg", 

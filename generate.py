@@ -9,7 +9,7 @@ parser.add_argument("-dp", "--data_path", help="Path to the csv file",
 parser.add_argument("-sp", "--save_path", help="save image directory",
                     type=str, default="./new_samples/to_test_new/")
 parser.add_argument("-np", "--number_of_plates", help="number of image",
-                    type=int, default=15)
+                    type=int, default=100)
 parser.add_argument("-s", "--save", help="save or imshow",
                     type=bool, default=True)
 parser.add_argument("-r", "--random", help="Random plate numbers",

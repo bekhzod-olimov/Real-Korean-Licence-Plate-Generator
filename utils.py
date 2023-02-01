@@ -65,7 +65,8 @@ def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
     
     # number 1
     if random:
-        plate_int = int(np.random.randint(low=0, high=9, size=1))
+        plate_int = int(np.random.randint(low=1, high=9, size=1)) if three_digit else int(np.random.randint(low=0, high=9, size=1))
+        temp = plate_int
     else:
         plate_int = int(plate_chars[0])
 
@@ -82,7 +83,7 @@ def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
 
     # number 2
     if random:
-        plate_int = int(np.random.randint(low=0, high=9, size=1))
+        plate_int = int(np.random.randint(low=1, high=9, size=1)) if temp == 0 else int(np.random.randint(low=0, high=9, size=1))
     else:
         plate_int = int(plate_chars[1])
     
@@ -105,48 +106,40 @@ def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
             plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
             col += num_size[0]
 
-    if label_prefix == "commercial_north" or label_prefix == "green_old":
-        row, col = 72, 8
+    if label_prefix in ["green_old", "commercial_north"]:
+        row, col = 85, 5 # 72
 
     # character 3
-    if label_prefix == "basic_north" or label_prefix == "basic_europe":
-
-        if random:
-            plate_int = int(np.random.randint(low=0, high=9, size=1))
-            plate_int = char_list[plate_int]
-        else:
-            plate_int = (plate_chars[-5])
-        
-        label += str(plate_int)
-        try:
-            plate[row:row + char_size[1], col:col + char_size[0], :] = cv2.resize(char_ims[plate_int], char_size)
-        except:
-            print("\n!!!!!!!!!!!! FILE MISSING ERROR !!!!!!!!!!!!")
-            print(f"Character {plate_chars[-5]} is missing!\n")
-            
-        if label_prefix == "basic_north":
-            col += (char_size[0] + init_size[1])
-        else:
-            col += (char_size[0] + 25)
-
+    if random:
+        plate_int = int(np.random.randint(low=0, high=9, size=1))
+        plate_int = char_list[plate_int]
     else:
-        if random:
-            plate_int = int(np.random.randint(low=0, high=9, size=1))
-            plate_int = char_list[plate_int]
-        else:
-            plate_int = (plate_chars[-5])
-        
-        label += str(plate_int)
-        
-        try:
-            plate[row:row + char_size[1], col:col + char_size[0], :] = cv2.resize(char_ims[plate_int], char_size)
-            col += char_size[0]
+        plate_int = (plate_chars[-5])
 
-            if label_prefix == "green_basic":
-                row, col = 75, 8
-        except:
-            print("\n!!!!!!!!!!!! FILE MISSING ERROR !!!!!!!!!!!!")
-            print(f"Character {plate_chars[-5]} is missing!\n")
+    label += str(plate_int)
+    
+    try:
+        if label_prefix in ["basic_north"]:
+            row += 5
+        plate[row:row + char_size[1], col:col + char_size[0], :] = cv2.resize(char_ims[plate_int], char_size)
+    except:
+        print("\n!!!!!!!!!!!! FILE MISSING ERROR !!!!!!!!!!!!")
+        print(f"Character {plate_chars[-5]} is missing!\n")
+
+    if label_prefix == "basic_north":
+        # col += (char_size[0] + init_size[1])
+        row -= 5
+        col += (49 + 10)
+    elif label_prefix == "basic_europe":
+        # col += (char_size[0] + 25)
+        col += (60 + 25)
+    elif label_prefix == "green_basic":
+        row, col = 75, 8
+    elif label_prefix in ["commercial_north", "green_old"]:
+        row -= 13
+        col += 65
+    elif label_prefix in ["commercial_europe"]:
+        col += 70
     
     if num_size_2 != None:
         plate, label = partial_write(plate, label, num_list, num_ims, plate_chars, num_size_2, row, col, random)
@@ -182,26 +175,13 @@ def load(files_path):
         
     return ims, chars
 
-def preprocess(plate_path, plate_size, label_prefix, init_size, three_digit, plate_chars):
+def preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars):
     
     plate = cv2.resize(cv2.imread(plate_path), plate_size)
     label = f"{label_prefix}__" 
     row, col = init_size[0], init_size[1]
     
-    if len(plate_chars) > 7:
-        
-        three_digit = True
-        if label_prefix == "basic_europe":
-            row, col = init_size[0] + 2, init_size[1] - 18 
-        elif label_prefix == "basic_north":
-            # row, col = init_size[0] - 5, init_size[1] - 5 
-            row, col = init_size[0] - 5, 2 
-        elif label_prefix in ["green_old", "commercial_north"]:
-            row, col = init_size[0], init_size[1] - 20 
-        elif label_prefix == "green_basic":
-            row, col = init_size[0], init_size[1] - 35 
-    
-    return plate, label, row, col, three_digit
+    return plate, label, row, col
     
 
 def generate_plate(plate_path, plate, plate_size, num_size, num_size_2, random, all_regions,
@@ -209,7 +189,7 @@ def generate_plate(plate_path, plate, plate_size, num_size, num_size_2, random, 
                    regions, region_name, region_size, save_path, label_prefix, save_):
     
     plate_chars = [char for char in plate]
-    plate, label, row, col, three_digit = preprocess(plate_path, plate_size, label_prefix, init_size, three_digit, plate_chars)
+    plate, label, row, col = preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars)
     
     if random:
         randint = int(np.random.randint(low=0, high=len(all_regions), size=1))

@@ -31,19 +31,18 @@ class PlateGenerator:
 
                 init_digit_types = ["three", "two"]
                 init_digit = init_digit_types[int(np.random.choice(np.arange(0, len(init_digit_types)), p=[0.4, 0.6]))]
+                three_digit = True if init_digit == "three" else False
 
-                if plate_type in ["basic_europe", "basic_north", "green_basic"]: 
-                    three_digit, plate = True if init_digit == "three" else False, "01마0000"
-
-                elif plate_type in ["commercial_europe", "commercial_north", "green_old"]: 
-                    three_digit, plate = False, "경기01마0101"
-            
+                plate = "경기01마0101" if plate_type in ["commercial_europe", "commercial_north", "green_old"] else "01마0000"
+                if plate_type in ["commercial_europe", "commercial_north", "green_old", "green_basic"]:
+                    three_digit = False
+                    
             except:
                 pass
             
         else:
             if plate[0].isalpha(): 
-                three_digit, plate_type  = False, "commercial_europe"
+                three_digit, plate_type = False, "commercial_europe"
             elif plate[0].isdigit():
                 three_digit, plate_type = True if len(plate) > 7 else False, "basic_europe"
         
@@ -64,81 +63,36 @@ class PlateGenerator:
     def generation(self, plate, save, plate_type, num, region_name):
         
         for _ in range(num):
+            plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, region_size, all_regions, plate_size = "plates/plate.jpg", self.num_lists, (56, 83), None, (13, 36), self.char_lists, None, self.num_ims, (60, 83), self.char_ims, None, self.regions_lists_yellow, (520, 110)
             
             three_digit, plate, plate_type, digits, region_name = self.preprocessing(plate, self.random, self.plate_types)
             
-            if plate_type == "basic_europe":
-                generate_plate(plate_path="plates/plate.jpg", random=self.random,
-                           plate=plate, num_size=(56, 83), num_size_2=None, 
-                           num_list=self.num_lists, init_size=(13, 36), # start from left to right
-                           char_list=self.char_lists, regions=None, three_digit = three_digit,
-                           num_ims=self.num_ims, char_size=(60, 83), region_name=None,
-                           char_ims=self.char_ims, label_prefix=plate_type,
-                           save_path=self.save_path, region_size=None, all_regions=self.regions_lists_yellow,
-                           save_=save, plate_size=(520, 110))
-
-            elif plate_type == "basic_north":
-                generate_plate(plate_path="plates/plate.jpg",  random=self.random,
-                           plate=plate, num_size=(40, 83), num_size_2=None, 
-                           num_list=self.num_lists, init_size=(46, 10),
-                           char_list=self.char_lists, regions=None, three_digit = three_digit,
-                           num_ims=self.num_ims, char_size=(49, 70),  region_name=None,
-                           char_ims=self.char_ims, label_prefix=plate_type,
-                           save_path=self.save_path, region_size=None, all_regions=self.regions_lists_yellow,
-                           save_=save, plate_size=(355, 155))
-
-            elif plate_type == "commercial_north":
-
-                self.assertion(region_name, self.regions_lists_yellow)
-
-                generate_plate(plate_path="plates/plate_y.jpg",  random=self.random,
-                           plate=digits, num_size=(44, 60), num_size_2=(64, 90), 
-                           num_list=self.num_lists_yellow, char_list=self.char_lists_yellow,
-                           num_ims=self.num_ims_yellow, char_ims=self.char_ims_yellow,
-                           init_size=(8, 76), # start from left to right
-                           regions=self.regions_yellow, three_digit = three_digit,
-                           char_size=(64, 62), region_name=region_name,
-                           label_prefix=plate_type, all_regions=self.regions_lists_yellow,
-                           save_path=self.save_path, region_size=(88, 60),
-                           save_=save, plate_size=(336, 170))
-
-
-            elif plate_type == "commercial_europe":
-
-                self.assertion(region_name, self.regions_lists_yellow)
-
-                generate_plate(plate_path="plates/plate_y.jpg",  random=self.random,
-                           plate=digits, num_size=(56, 83), num_size_2=None, 
-                           num_list=self.num_lists_yellow, char_list=self.char_lists_yellow,
-                           num_ims=self.num_ims_yellow, char_ims=self.char_ims_yellow,
-                           init_size=(13, 36), # start from left to right
-                           regions=self.regions_yellow, three_digit = three_digit,
-                           char_size=(60, 83), region_name=region_name,
-                           label_prefix=plate_type, all_regions=self.regions_lists_yellow,
-                           save_path=self.save_path, region_size=(88, 60),
-                           save_=save, plate_size=(520, 110))
-
+            self.assertion(region_name, self.regions_lists_yellow) if plate_type in ["commercial_north", "commercial_europe", "green_old"] else 0
+            
+            if plate_type == "basic_north": num_size, init_size, char_size, plate_size = (40, 83), (46, 10), (49, 70), (355, 155)
+                
+            elif plate_type == "commercial_north": 
+                plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, region_size, all_regions, plate_size = "plates/plate_y.jpg", self.num_lists_yellow, (44, 60), (64, 90), (8, 76), self.char_lists_yellow, self.regions_yellow, self.num_ims_yellow, (64, 62), self.char_ims_yellow, (88, 60), self.regions_lists_yellow, (336, 170)
+                
+            elif plate_type == "commercial_europe": 
+                plate_path, num_list, char_list, regions, num_ims, char_ims, region_size = "plates/plate_y.jpg", self.num_lists_yellow,  self.char_lists_yellow, self.regions_yellow, self.num_ims_yellow, self.char_ims_yellow, (88, 60)
+                
             elif plate_type == "green_old":
                 
-                self.assertion(region_name, self.regions_lists_yellow)
-
-                generate_plate(plate_path="plates/plate_g.jpg", 
-                           plate=digits, num_size=(44, 60), num_size_2=(64, 90), all_regions=self.regions_lists_yellow,
-                           num_list=self.num_lists_green, char_list=self.char_lists_green,
-                           num_ims=self.num_ims_green, char_ims=self.char_ims_green,
-                           init_size=(8, 76), # start from left to right 
-                           regions=self.regions_green, three_digit = three_digit,
-                           char_size=(64, 62), region_name=region_name,
-                           label_prefix=plate_type,  random=self.random,
-                           save_path=self.save_path, region_size=(88, 60),
-                           save_=save, plate_size=(336, 170))
-
+                plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, region_size, all_regions, plate_size = "plates/plate_g.jpg", self.num_lists_green, (44, 60), (64, 90), (8, 76), self.char_lists_green, self.regions_green, self.num_ims_green, (64, 62), self.char_ims_green, (88, 60), self.regions_lists_yellow, (336, 170)
+             
             elif plate_type == "green_basic":
-                generate_plate(plate_path="plates/plate_g.jpg", 
-                           plate=plate, num_size=(60, 65), num_size_2=(80, 90), 
-                           num_list=self.num_lists_green, char_list=self.char_lists_green,
-                           num_ims=self.num_ims_green, char_ims=self.char_ims_green, region_size=None,
-                           init_size=(8, 78),  random=self.random, all_regions=self.regions_lists_yellow,
-                           char_size=(60, 65), label_prefix=plate_type, regions=None,
-                           save_path=self.save_path, region_name=None, three_digit = False,
-                           save_=save, plate_size=(336, 170))
+                
+                plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, all_regions, plate_size = "plates/plate_g.jpg", self.num_lists_green, (60, 65), (80, 90), (8, 78), self.char_lists_green, self.regions_green, self.num_ims_green, (60, 65), self.char_ims_green, self.regions_lists_yellow, (336, 170)
+            
+            generate_plate(plate_path=plate_path, random=self.random,
+                           plate=plate, num_size=num_size, num_size_2=num_size_2, 
+                           num_list=num_list, init_size=init_size, 
+                           char_list=char_list, regions=regions, three_digit = three_digit,
+                           num_ims=num_ims, char_size=char_size, region_name=region_name,
+                           char_ims=char_ims, label_prefix=plate_type,
+                           save_path=self.save_path, region_size=region_size, all_regions=all_regions,
+                           save_=save, plate_size=plate_size)
+            
+
+        

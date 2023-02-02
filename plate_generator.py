@@ -142,4 +142,3 @@ class PlateGenerator:
                            char_size=(60, 65), label_prefix=plate_type, regions=None,
                            save_path=self.save_path, region_name=None, three_digit = False,
                            save_=save, plate_size=(336, 170))
-        

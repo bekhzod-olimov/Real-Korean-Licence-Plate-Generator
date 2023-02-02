@@ -1,36 +1,20 @@
-import os, random, math
-import cv2
+import os, cv2
 import numpy as np
-import pandas as pd
-from albumentations.augmentations.geometric.transforms import *
-import albumentations
-from matplotlib import pyplot as plt
+from transformations import transform_plate
 
-def random_bright(img):
-    
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-    img = np.array(img, dtype=np.float64)
-    random_bright = .5 + np.random.uniform()
-    img[:, :, 2] = img[:, :, 2] * random_bright
-    img[:, :, 2][img[:, :, 2] > 255] = 255
-    img = np.array(img, dtype=np.uint8)
-    img = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
-    
-    return img
-
-def get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, char_num, temp):
+def get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, char_num, temp, need_temp):
         
     if temp == "0": three_digit = True
     plate_int = num_list[int(np.random.randint(low=1, high=9, size=1)) if three_digit else int(np.random.randint(low=0, high=9, size=1))] if random else num_list[int(plate_chars[char_num])]
     plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
     col += num_size[0]
     
-    return plate, label + str(plate_int), col
+    return (plate, label + str(plate_int), col, plate_int) if need_temp else (plate, label + str(plate_int), col)
     
-def partial_write(plate, label, num_list, num_ims, plate_chars, num_size, row, col, three_digit, random):
+def write_partial(plate, label, num_list, num_ims, plate_chars, num_size, row, col, three_digit, random):
     
     for i in range(-4, 0):
-        plate, label, col = get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, i, None)
+        plate, label, col = get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, i, None, False)
     
     return plate, label
     
@@ -38,70 +22,43 @@ def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
     
     if label_prefix == "basic_north" and three_digit: col -= 20
     elif label_prefix == "basic_europe" and three_digit: col -= 15
-    
     if label_prefix == "basic_north": row, col = row - 5, col + 17
     
-    for i in range(2):
-        plate, label, col = get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, i, None)
+    for i in range(2): 
+        if i == 0: temp = None
+        print(temp)
+        (plate, label, col, temp) = get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, i, temp, True)
     
-    if label_prefix == "commercial_europe":
-        pass
+    if label_prefix == "commercial_europe": pass
     else:    
-        if three_digit:
+        if three_digit: plate, label, col = get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, 2, None, False)
 
-            if random:
-                plate_int = int(np.random.randint(low=0, high=9, size=1))
-            else:
-                plate_int = int(plate_chars[2])
-
-            label += str(num_list[plate_int])
-            plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
-            col += num_size[0]
-
-    if label_prefix in ["green_old", "commercial_north"]:
-        row, col = 85, 5 
+    if label_prefix in ["green_old", "commercial_north"]: row, col = 85, 5 
 
     # character 3
     plate_int = char_list[int(np.random.randint(low=0, high=9, size=1))] if random else (plate_chars[-5])
     label += str(plate_int)
     
     try:
-        if label_prefix in ["basic_north"]:
-            row += 5
+        if label_prefix in ["basic_north"]: row += 5
         plate[row:row + char_size[1], col:col + char_size[0], :] = cv2.resize(char_ims[plate_int], char_size)
     except:
         print("\n!!!!!!!!!!!! FILE MISSING ERROR !!!!!!!!!!!!")
         print(f"Character {plate_chars[-5]} is missing!\n")
 
-    if label_prefix == "basic_north":
-        # col += (char_size[0] + init_size[1])
-        row -= 5
-        col += (49 + 10)
-    elif label_prefix == "basic_europe":
-        # col += (char_size[0] + 25)
-        col += (60 + 25)
-    elif label_prefix == "green_basic":
-        row, col = 75, 8
-    elif label_prefix in ["commercial_north", "green_old"]:
-        row -= 13
-        col += 65
-    elif label_prefix in ["commercial_europe"]:
-        col += 70
+    if label_prefix == "basic_north": row, col = row - 5, col + 59
+    elif label_prefix == "basic_europe": col += 85
+    elif label_prefix == "green_basic": row, col = 75, 8
+    elif label_prefix in ["commercial_north", "green_old"]: row, col = row - 13, col + 65
+    elif label_prefix in ["commercial_europe"]: col += 70
     
-    if num_size_2 != None:
-        plate, label = partial_write(plate, label, num_list, num_ims, plate_chars, num_size_2, row, col, three_digit, random)
-    else:
-        plate, label = partial_write(plate, label, num_list, num_ims, plate_chars, num_size, row, col, three_digit, random)
+    plate, label = write_partial(plate, label, num_list, num_ims, plate_chars, num_size_2, row, col, three_digit, random) if num_size_2 != None else write_partial(plate, label, num_list, num_ims, plate_chars, num_size, row, col, three_digit, random)
         
     return plate, label
 
 def save(plate, save_path, transformations, label):
     
-    if transformations:
-        plate = random_bright(plate)
-        tfs = albumentations.Compose([Affine(rotate=[-7, 7], shear=None, p=0.5),
-                                      Perspective(scale=(0.02, 0.1), p=0.1)])
-        plate = tfs(image=plate)["image"]
+    if transformations: plate = transform_plate(plate)
     
     folder = label.split('__')[0]
     save_dir = os.path.join(save_path, folder)
@@ -122,25 +79,22 @@ def load(files_path):
         
     return ims, chars
 
-def preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars):
+def preprocess(plate, plate_path, plate_size, label_prefix, init_size):
     
+    plate_chars = [char for char in plate]
     plate = cv2.resize(cv2.imread(plate_path), plate_size)
     label = f"{label_prefix}__" 
     row, col = init_size[0], init_size[1]
     
-    return plate, label, row, col
+    return plate_chars, plate, label, row, col
     
-
 def generate_plate(plate_path, plate, plate_size, num_size, num_size_2, random, all_regions,
                    char_size, init_size, num_list, three_digit, char_list, num_ims, char_ims, 
                    regions, region_name, region_size, save_path, label_prefix, save_):
     
-    plate_chars = [char for char in plate]
-    plate, label, row, col = preprocess(plate_path, plate_size, label_prefix, init_size, plate_chars)
+    plate_chars, plate, label, row, col = preprocess(plate, plate_path, plate_size, label_prefix, init_size)
     
-    if random:
-        randint = int(np.random.randint(low=0, high=len(all_regions), size=1))
-        region_name = all_regions[randint]
+    if random: region_name = all_regions[int(np.random.randint(low=0, high=len(all_regions), size=1))]
 
     if label_prefix == "commercial_europe":
 

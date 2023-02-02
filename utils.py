@@ -5,7 +5,7 @@ from transformations import transform_plate
 def get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, char_num, temp, need_temp):
         
     if temp == "0": three_digit = True
-    plate_int = num_list[int(np.random.randint(low=1, high=9, size=1)) if three_digit else int(np.random.randint(low=0, high=9, size=1))] if random else num_list[int(plate_chars[char_num])]
+    plate_int = num_list[int(np.random.randint(low=1, high=len(num_list), size=1)) if three_digit else int(np.random.randint(low=0, high=len(num_list), size=1))] if random else num_list[int(plate_chars[char_num])]
     plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
     col += num_size[0]
     
@@ -26,7 +26,6 @@ def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
     
     for i in range(2): 
         if i == 0: temp = None
-        print(temp)
         (plate, label, col, temp) = get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, i, temp, True)
     
     if label_prefix == "commercial_europe": pass
@@ -36,7 +35,7 @@ def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, pl
     if label_prefix in ["green_old", "commercial_north"]: row, col = 85, 5 
 
     # character 3
-    plate_int = char_list[int(np.random.randint(low=0, high=9, size=1))] if random else (plate_chars[-5])
+    plate_int = char_list[int(np.random.randint(low=0, high=len(char_list), size=1))] if random else (plate_chars[-5])
     label += str(plate_int)
     
     try:

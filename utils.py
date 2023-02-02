@@ -89,7 +89,7 @@ def preprocess(plate, plate_path, plate_size, label_prefix, init_size):
     
 def generate_plate(plate_path, plate, plate_size, num_size, num_size_2, random, all_regions,
                    char_size, init_size, num_list, three_digit, char_list, num_ims, char_ims, 
-                   regions, region_name, region_size, save_path, label_prefix, save_):
+                   regions, region_name, region_size, save_path, label_prefix, save_, transformations):
     
     plate_chars, plate, label, row, col = preprocess(plate, plate_path, plate_size, label_prefix, init_size)
     
@@ -113,4 +113,4 @@ def generate_plate(plate_path, plate, plate_size, num_size, num_size_2, random, 
                          num_size_2=num_size_2, char_ims=char_ims, char_size=char_size, 
                          label_prefix=label_prefix, row=row, num_size=num_size, col=col)
 
-    if save_: save(plate=plate, save_path=save_path, transformations=False, label=label)
+    if save_: save(plate=plate, save_path=save_path, transformations=transformations, label=label)

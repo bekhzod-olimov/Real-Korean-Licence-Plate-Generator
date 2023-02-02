@@ -2,10 +2,11 @@ from utils import *
 
 class PlateGenerator:
     
-    def __init__(self, save_path, random):
+    def __init__(self, save_path, random, transformations):
         
         self.save_path = save_path
         self.random = random
+        self.transformations = transformations
         self.plate_types = ["basic_europe", "basic_north", "commercial_europe", "commercial_north", "green_old", "green_basic"]
 
         # Basic nums and chars
@@ -26,20 +27,15 @@ class PlateGenerator:
     def preprocessing(self, plate, random, plate_types):
         
         if random:
-            try:
-                plate_type = plate_types[int(np.random.choice(np.arange(0, len(plate_types)), p=[0.33, 0.32, 0.15, 0.15, 0.03, 0.02]))]
+            plate_type = plate_types[int(np.random.choice(np.arange(0, len(plate_types)), p=[0.33, 0.32, 0.15, 0.15, 0.03, 0.02]))]
+            init_digit_types = ["three", "two"]
+            init_digit = init_digit_types[int(np.random.choice(np.arange(0, len(init_digit_types)), p=[0.4, 0.6]))]
+            three_digit = True if init_digit == "three" else False
 
-                init_digit_types = ["three", "two"]
-                init_digit = init_digit_types[int(np.random.choice(np.arange(0, len(init_digit_types)), p=[0.4, 0.6]))]
-                three_digit = True if init_digit == "three" else False
-
-                plate = "경기01마0101" if plate_type in ["commercial_europe", "commercial_north", "green_old"] else "01마0000"
-                if plate_type in ["commercial_europe", "commercial_north", "green_old", "green_basic"]:
-                    three_digit = False
+            plate = "경기01마0101" if plate_type in ["commercial_europe", "commercial_north", "green_old"] else "01마0000"
+            if plate_type in ["commercial_europe", "commercial_north", "green_old", "green_basic"]:
+                three_digit = False
                     
-            except:
-                pass
-            
         else:
             if plate[0].isalpha(): 
                 three_digit, plate_type = False, "commercial_europe"
@@ -92,7 +88,7 @@ class PlateGenerator:
                            num_ims=num_ims, char_size=char_size, region_name=region_name,
                            char_ims=char_ims, label_prefix=plate_type,
                            save_path=self.save_path, region_size=region_size, all_regions=all_regions,
-                           save_=save, plate_size=plate_size)
+                           save_=save, plate_size=plate_size, transformations=self.transformations)
             
 
         

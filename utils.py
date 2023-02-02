@@ -18,55 +18,31 @@ def random_bright(img):
     
     return img
 
-
-def test(random, three_digit, plate_chars, label, num_list, char_num, temp):
-    
+def get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, char_num, temp):
+        
     if temp == "0": three_digit = True
     plate_int = num_list[int(np.random.randint(low=1, high=9, size=1)) if three_digit else int(np.random.randint(low=0, high=9, size=1))] if random else num_list[int(plate_chars[char_num])]
+    plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
+    col += num_size[0]
     
-    return label + str(plate_int), plate_int
-
+    return plate, label + str(plate_int), col
+    
 def partial_write(plate, label, num_list, num_ims, plate_chars, num_size, row, col, three_digit, random):
     
-    label, plate_int = test(random, three_digit, plate_chars, label, num_list, -4, None)
-    plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
-    col += num_size[0]
-
-    # number 5
-    label, plate_int = test(random, three_digit, plate_chars, label, num_list, -3, None)
-    plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
-    col += num_size[0] 
-
-    # number 6
-    label, plate_int = test(random, three_digit, plate_chars, label, num_list, -2, None)
-    plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
-    col += num_size[0] 
-
-    # number 7
-    label, plate_int = test(random, three_digit, plate_chars, label, num_list, -1, None)
-    plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
-    col += num_size[0]
+    for i in range(-4, 0):
+        plate, label, col = get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, i, None)
     
     return plate, label
     
 def write(plate, label, num_list, num_ims, init_size, three_digit, char_list, plate_chars, num_size, num_size_2, char_ims, char_size, label_prefix, row, col, random):
     
-    label, plate_int = test(random, three_digit, plate_chars, label, num_list, 0, None)
-    temp = plate_int
-
     if label_prefix == "basic_north" and three_digit: col -= 20
     elif label_prefix == "basic_europe" and three_digit: col -= 15
     
-    if label_prefix == "basic_north":
-        row -= 5
-        col += 17
-    plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size) #(56, 83)
-    col += num_size[0]
-
-    # number 2
-    label, plate_int = test(random, three_digit, plate_chars, label, num_list, 1, temp)
-    plate[row:row + num_size[1], col:col + num_size[0], :] = cv2.resize(num_ims[str(plate_int)], num_size)
-    col += num_size[0]
+    if label_prefix == "basic_north": row, col = row - 5, col + 17
+    
+    for i in range(2):
+        plate, label, col = get_label_and_plate(plate, row, col, num_size, num_ims, random, three_digit, plate_chars, label, num_list, i, None)
     
     if label_prefix == "commercial_europe":
         pass

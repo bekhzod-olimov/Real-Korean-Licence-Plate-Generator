@@ -66,19 +66,13 @@ class PlateGenerator:
             
             if plate_type == "basic_north": num_size, init_size, char_size, plate_size = (40, 83), (46, 10), (49, 70), (355, 155)
                 
-            elif plate_type == "commercial_north": 
-                plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, region_size, all_regions, plate_size = "plates/plate_y.jpg", self.num_lists_yellow, (44, 60), (64, 90), (8, 76), self.char_lists_yellow, self.regions_yellow, self.num_ims_yellow, (64, 62), self.char_ims_yellow, (88, 60), self.regions_lists_yellow, (336, 170)
+            elif plate_type == "commercial_north": plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, region_size, all_regions, plate_size = "plates/plate_y.jpg", self.num_lists_yellow, (44, 60), (64, 90), (8, 76), self.char_lists_yellow, self.regions_yellow, self.num_ims_yellow, (64, 62), self.char_ims_yellow, (88, 60), self.regions_lists_yellow, (336, 170)
                 
-            elif plate_type == "commercial_europe": 
-                plate_path, num_list, char_list, regions, num_ims, char_ims, region_size = "plates/plate_y.jpg", self.num_lists_yellow,  self.char_lists_yellow, self.regions_yellow, self.num_ims_yellow, self.char_ims_yellow, (88, 60)
+            elif plate_type == "commercial_europe": plate_path, num_list, char_list, regions, num_ims, char_ims, region_size = "plates/plate_y.jpg", self.num_lists_yellow,  self.char_lists_yellow, self.regions_yellow, self.num_ims_yellow, self.char_ims_yellow, (88, 60)
                 
-            elif plate_type == "green_old":
-                
-                plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, region_size, all_regions, plate_size = "plates/plate_g.jpg", self.num_lists_green, (44, 60), (64, 90), (8, 76), self.char_lists_green, self.regions_green, self.num_ims_green, (64, 62), self.char_ims_green, (88, 60), self.regions_lists_yellow, (336, 170)
+            elif plate_type == "green_old": plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, region_size, all_regions, plate_size = "plates/plate_g.jpg", self.num_lists_green, (44, 60), (64, 90), (8, 76), self.char_lists_green, self.regions_green, self.num_ims_green, (64, 62), self.char_ims_green, (88, 60), self.regions_lists_yellow, (336, 170)
              
-            elif plate_type == "green_basic":
-                
-                plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, all_regions, plate_size = "plates/plate_g.jpg", self.num_lists_green, (60, 65), (80, 90), (8, 78), self.char_lists_green, self.regions_green, self.num_ims_green, (60, 65), self.char_ims_green, self.regions_lists_yellow, (336, 170)
+            elif plate_type == "green_basic": plate_path, num_list, num_size, num_size_2, init_size, char_list, regions, num_ims, char_size, char_ims, all_regions, plate_size = "plates/plate_g.jpg", self.num_lists_green, (60, 65), (80, 90), (8, 78), self.char_lists_green, self.regions_green, self.num_ims_green, (60, 65), self.char_ims_green, self.regions_lists_yellow, (336, 170)
             
             generate_plate(plate_path=plate_path, random=self.random,
                            plate=plate, num_size=num_size, num_size_2=num_size_2, 
@@ -88,6 +82,3 @@ class PlateGenerator:
                            char_ims=char_ims, label_prefix=plate_type,
                            save_path=self.save_path, region_size=region_size, all_regions=all_regions,
                            save_=save, plate_size=plate_size, transformations=self.transformations)
-            
-
-        

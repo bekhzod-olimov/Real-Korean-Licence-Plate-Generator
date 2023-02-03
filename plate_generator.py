@@ -9,19 +9,18 @@ class PlateGenerator:
         self.transformations = transformations
         self.plate_types = ["basic_europe", "basic_north", "commercial_europe", "commercial_north", "green_old", "green_basic"]
 
-        # Basic nums and chars
-        self.num_ims, self.num_lists = load("./digits/")
-        # self.num_ims, self.num_lists = load("./digits_uzbek/")
-        self.char_ims, self.char_lists = load("./characters/")
+        # Basic nums and chars0
+        self.num_ims, self.num_lists = load("digits/digits_white/")
+        self.char_ims, self.char_lists = load("letters/letters_white/")
 
         # Yellow nums and chars
-        self.num_ims_yellow, self.num_lists_yellow = load("./digits_yellow/")
-        self.char_ims_yellow, self.char_lists_yellow = load("./characters_yellow/")
+        self.num_ims_yellow, self.num_lists_yellow = load("digits/digits_yellow/")
+        self.char_ims_yellow, self.char_lists_yellow = load("letters/letters_yellow/")
         self.regions_yellow, self.regions_lists_yellow = load("./regions_yellow/")
        
         # Green nums and chars
-        self.num_ims_green, self.num_lists_green = load("./digits_green/")
-        self.char_ims_green, self.char_lists_green = load("./characters_green/")
+        self.num_ims_green, self.num_lists_green = load("digits/digits_green/")
+        self.char_ims_green, self.char_lists_green = load("letters/letters_green/")
         self.regions_green, self.regions_lists_green = load("./regions_green/")
         
     def preprocessing(self, plate, random, plate_types):

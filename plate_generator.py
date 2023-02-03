@@ -16,12 +16,12 @@ class PlateGenerator:
         # Yellow nums and chars
         self.num_ims_yellow, self.num_lists_yellow = load("digits/digits_yellow/")
         self.char_ims_yellow, self.char_lists_yellow = load("letters/letters_yellow/")
-        self.regions_yellow, self.regions_lists_yellow = load("./regions_yellow/")
+        self.regions_yellow, self.regions_lists_yellow = load("regions/regions_yellow/")
        
         # Green nums and chars
         self.num_ims_green, self.num_lists_green = load("digits/digits_green/")
         self.char_ims_green, self.char_lists_green = load("letters/letters_green/")
-        self.regions_green, self.regions_lists_green = load("./regions_green/")
+        self.regions_green, self.regions_lists_green = load("regions/regions_green/")
         
     def preprocessing(self, plate, random, plate_types):
         

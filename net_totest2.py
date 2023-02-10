@@ -989,34 +989,13 @@ class ResnetGenerator(nn.Module):
                           norm_layer(int(ngf * mult / 2)),
                           WIBReLU(True)]
                           
-                # model += [Upsample(ngf * mult),
-                #           nn.Conv2d(ngf * mult, int(ngf * mult / 2),
-                #                     kernel_size=3, stride=1,
-                #                     padding=1,  # output_padding=1,
-                #                     bias=use_bias),
-                #           norm_layer(int(ngf * mult / 2)),
-                #           nn.ReLU(True)]
-                
-                
-        # model += [nn.ReflectionPad2d(3)]
-        # model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)]
-        # model += [nn.Tanh()]
-        
         model += [nn.ReflectionPad2d(3)]
         model += [nn.Conv2d(ngf, ngf // 2, kernel_size=5, padding=0, bias=use_bias), WIBReLU(True),
                    nn.Conv2d(ngf // 2, output_nc, kernel_size=3, padding=0, bias=use_bias)]
         model += [nn.Tanh()]
         
         self.model = nn.Sequential(*model)
-        # print(self.model)
         
-        
-        # self.model2 = nn.Sequential(*model2)
-        # a = torch.rand(1,3,256,256)
-        # print(self.model2)
-        # print(self.model(a).shape)
-        # print(self.model2(a).shape)
-    
     def forward(self, input, layers=[], encode_only=False):
         if -1 in layers:
             layers.append(len(self.model))
@@ -1041,117 +1020,6 @@ class ResnetGenerator(nn.Module):
             """Standard forward"""
             fake = self.model(input)
             return fake
-
-
-class ResnetDecoder(nn.Module):
-    """Resnet-based decoder that consists of a few Resnet blocks + a few upsampling operations.
-    """
-
-    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, n_blocks=6, padding_type='reflect', no_antialias=False):
-        """Construct a Resnet-based decoder
-        Parameters:
-            input_nc (int)      -- the number of channels in input images
-            output_nc (int)     -- the number of channels in output images
-            ngf (int)           -- the number of filters in the last conv layer
-            norm_layer          -- normalization layer
-            use_dropout (bool)  -- if use dropout layers
-            n_blocks (int)      -- the number of ResNet blocks
-            padding_type (str)  -- the name of padding layer in conv layers: reflect | replicate | zero
-        """
-        assert(n_blocks >= 0)
-        super(ResnetDecoder, self).__init__()
-        if type(norm_layer) == functools.partial:
-            use_bias = norm_layer.func == nn.InstanceNorm2d
-        else:
-            use_bias = norm_layer == nn.InstanceNorm2d
-        model = []
-        n_downsampling = 2
-        mult = 2 ** n_downsampling
-        for i in range(n_blocks):       # add ResNet blocks
-
-            model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
-
-        for i in range(n_downsampling):  # add upsampling layers
-            mult = 2 ** (n_downsampling - i)
-            if(no_antialias):
-                model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
-                                             kernel_size=3, stride=2,
-                                             padding=1, output_padding=1,
-                                             bias=use_bias),
-                          norm_layer(int(ngf * mult / 2)),
-                          nn.ReLU(True)]
-            else:
-                model += [Upsample(ngf * mult),
-                          nn.Conv2d(ngf * mult, int(ngf * mult / 2),
-                                    kernel_size=3, stride=1,
-                                    padding=1,
-                                    bias=use_bias),
-                          norm_layer(int(ngf * mult / 2)),
-                          nn.ReLU(True)]
-                
-        model += [nn.ReflectionPad2d(3)]
-        model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)]
-        model += [nn.Tanh()]
-
-        self.model = nn.Sequential(*model)
-
-    def forward(self, input):
-        """Standard forward"""
-        return self.model(input)
-
-
-class ResnetEncoder(nn.Module):
-    """Resnet-based encoder that consists of a few downsampling + several Resnet blocks
-    """
-
-    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, n_blocks=6, padding_type='reflect', no_antialias=False):
-        """Construct a Resnet-based encoder
-        Parameters:
-            input_nc (int)      -- the number of channels in input images
-            output_nc (int)     -- the number of channels in output images
-            ngf (int)           -- the number of filters in the last conv layer
-            norm_layer          -- normalization layer
-            use_dropout (bool)  -- if use dropout layers
-            n_blocks (int)      -- the number of ResNet blocks
-            padding_type (str)  -- the name of padding layer in conv layers: reflect | replicate | zero
-        """
-        assert(n_blocks >= 0)
-        super(ResnetEncoder, self).__init__()
-        if type(norm_layer) == functools.partial:
-            use_bias = norm_layer.func == nn.InstanceNorm2d
-        else:
-            use_bias = norm_layer == nn.InstanceNorm2d
-
-        model = [nn.ReflectionPad2d(3),
-                 nn.Conv2d(input_nc, ngf, kernel_size=7, padding=0, bias=use_bias),
-                 norm_layer(ngf),
-                 nn.ReLU(True)]
-
-        n_downsampling = 2
-        for i in range(n_downsampling):  # add downsampling layers
-            mult = 2 ** i
-            if(no_antialias):
-                print("Encoder change reuki")
-                model += [nn.Conv2d(ngf * mult, ngf * mult * 2, kernel_size=3, stride=2, padding=1, bias=use_bias),
-                          norm_layer(ngf * mult * 2),
-                          nn.ReLU(True)]
-            else:
-                model += [nn.Conv2d(ngf * mult, ngf * mult * 2, kernel_size=3, stride=1, padding=1, bias=use_bias),
-                          norm_layer(ngf * mult * 2),
-                          nn.ReLU(True),
-                          Downsample(ngf * mult * 2)]
-
-        mult = 2 ** n_downsampling
-        for i in range(n_blocks):       # add ResNet blocks
-
-            model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
-
-        self.model = nn.Sequential(*model)
-
-    def forward(self, input):
-        """Standard forward"""
-        return self.model(input)
-
 
 class ResnetBlock(nn.Module):
     """Define a Resnet block"""

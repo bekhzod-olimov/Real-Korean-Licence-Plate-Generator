@@ -458,32 +458,6 @@ class LinearBlock(nn.Module):
             out = self.activation(out)
         return out
 
-##################################################################################
-# Normalization layers
-##################################################################################
-
-# class LayerNorm(nn.Module):
-#     def __init__(self, num_features, eps=1e-5, affine=True):
-#         super(LayerNorm, self).__init__()
-#         self.num_features = num_features
-#         self.affine = affine
-#         self.eps = eps
-
-#         if self.affine:
-#             self.gamma = nn.Parameter(torch.Tensor(num_features).uniform_())
-#             self.beta = nn.Parameter(torch.zeros(num_features))
-
-#     def forward(self, x):
-#         shape = [-1] + [1] * (x.dim() - 1)
-#         mean = x.view(x.size(0), -1).mean(1).view(*shape)
-#         std = x.view(x.size(0), -1).std(1).view(*shape)
-#         x = (x - mean) / (std + self.eps)
-
-#         if self.affine:
-#             shape = [1, -1] + [1] * (x.dim() - 2)
-#             x = x * self.gamma.view(*shape) + self.beta.view(*shape)
-#         return x
-
 class ResnetGenerator(nn.Module):
     """Resnet-based generator that consists of Resnet blocks between a few downsampling/upsampling operations.
     We adapt Torch code and idea from Justin Johnson's neural style transfer project(https://github.com/jcjohnson/fast-neural-style)

@@ -5,11 +5,18 @@ from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
 import numpy as np
+from matplotlib import pyplot as plt
 from .stylegan_networks import StyleGAN2Discriminator, StyleGAN2Generator, TileStyleGAN2Discriminator
 
 ###############################################################################
 # Helper Functions
 ###############################################################################
+
+def pp(var_name, var, shape=False):
+    if shape:
+        print(f"{var_name} -> {var.shape}\n")        
+    else:
+        print(f"{var_name} -> {var}\n")
 
 def get_filter(filt_size=3):
     if(filt_size == 1):
@@ -229,7 +236,7 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
     norm_layer = get_norm_layer(norm_type=norm)
 
     if netG == 'resnet_9blocks':
-        ngf = 32
+        ngf = 64
         net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, no_antialias=no_antialias, no_antialias_up=no_antialias_up, n_blocks=9, opt=opt)
     elif netG == 'resnet_6blocks':
         net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, no_antialias=no_antialias, no_antialias_up=no_antialias_up, n_blocks=6, opt=opt)
@@ -296,6 +303,7 @@ def define_D(input_nc, ndf, netD, n_layers_D=3, norm='batch', init_type='normal'
 
     if netD == 'basic':  # default PatchGAN classifier
         net = NLayerDiscriminator(input_nc, ndf, n_layers=2, norm_layer=norm_layer, no_antialias=no_antialias,)
+        # net = NLayerDiscriminator("rexnet_150", 1)
     elif netD == 'n_layers':  # more options
         net = NLayerDiscriminator(input_nc, ndf, n_layers_D, norm_layer=norm_layer, no_antialias=no_antialias,)
     elif netD == 'pixel':     # classify if each pixel is real or fake
@@ -382,11 +390,15 @@ class PatchSampleF(nn.Module):
         self.mlp_init = True
 
     def forward(self, feats, num_patches=64, patch_ids=None):
+        # pp("feats_shape", feats, False)
         return_ids = []
         return_feats = []
         if self.use_mlp and not self.mlp_init:
             self.create_mlp(feats)
         for feat_id, feat in enumerate(feats):
+            # if feat.shape[1] == 3:
+                # plt.imshow((feat[0]).detach().cpu().permute(1,2,0).numpy().astype(np.uint8))
+                # plt.savefig("sample.png")
             B, H, W = feat.shape[0], feat.shape[2], feat.shape[3]
             feat_reshape = feat.permute(0, 2, 3, 1).flatten(1, 2)
             if num_patches > 0:
@@ -458,6 +470,32 @@ class LinearBlock(nn.Module):
             out = self.activation(out)
         return out
 
+##################################################################################
+# Normalization layers
+##################################################################################
+
+# class LayerNorm(nn.Module):
+#     def __init__(self, num_features, eps=1e-5, affine=True):
+#         super(LayerNorm, self).__init__()
+#         self.num_features = num_features
+#         self.affine = affine
+#         self.eps = eps
+
+#         if self.affine:
+#             self.gamma = nn.Parameter(torch.Tensor(num_features).uniform_())
+#             self.beta = nn.Parameter(torch.zeros(num_features))
+
+#     def forward(self, x):
+#         shape = [-1] + [1] * (x.dim() - 1)
+#         mean = x.view(x.size(0), -1).mean(1).view(*shape)
+#         std = x.view(x.size(0), -1).std(1).view(*shape)
+#         x = (x - mean) / (std + self.eps)
+
+#         if self.affine:
+#             shape = [1, -1] + [1] * (x.dim() - 2)
+#             x = x * self.gamma.view(*shape) + self.beta.view(*shape)
+#         return x
+
 class ResnetGenerator(nn.Module):
     """Resnet-based generator that consists of Resnet blocks between a few downsampling/upsampling operations.
     We adapt Torch code and idea from Justin Johnson's neural style transfer project(https://github.com/jcjohnson/fast-neural-style)
@@ -508,7 +546,6 @@ class ResnetGenerator(nn.Module):
         for i in range(n_downsampling):  # add upsampling layers
             mult = 2 ** (n_downsampling - i)
             if no_antialias_up:
-                print("this is thrue")
                 
                 model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
                                              kernel_size=3, stride=2,
@@ -628,6 +665,21 @@ class ResnetBlock(nn.Module):
 
 class NLayerDiscriminator(nn.Module):
     """Defines a PatchGAN discriminator"""
+    
+#     def __init__(self, model_name, num_classes):
+        
+#         super(NLayerDiscriminator, self).__init__()
+
+#         self.model = timm.create_model(model_name, pretrained=True, num_classes=num_classes)
+#         print(f"{model_name} is successfully loaded!")
+            
+#     def forward(self, input):
+
+#         """Standard forward."""
+#         # print("discriminator is here")
+#         out = self.model(input)
+
+#         return out
 
     def __init__(self, input_nc, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d, no_antialias=False):
         """Construct a PatchGAN discriminator
@@ -669,6 +721,13 @@ class NLayerDiscriminator(nn.Module):
     def forward(self, input):
         
         """Standard forward."""
+        # print("discriminator is here")
         out = self.model(input)
-        
+
         return out
+
+            
+            
+
+        
+        
